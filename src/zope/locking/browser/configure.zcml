@@ -1,0 +1,45 @@
+<zope:configure
+    xmlns:zope="http://namespaces.zope.org/zope"
+    xmlns="http://namespaces.zope.org/browser"
+    i18n_domain="zope.locking">
+
+  <resource name="lock.gif" file="lock.gif"/>
+
+  <resource name="lockedout.gif" file="lockedout.gif"/>
+
+  <zope:adapter factory=".tokenview.defaultTemplate" name="default" />
+
+  <zope:adapter factory=".filters.locked" name="inToken"
+      provides="zope.interface.Interface" />
+
+  <zope:adapter factory=".filters.lockedOut" name="lockedOut"
+      provides="zope.interface.Interface" />
+
+  <page
+      for="*" 
+      name="manage_token.html"
+      class=".tokenview.ManageTokenView"
+      permission="zope.Public"
+      />
+
+  <menuItem
+      for="*"
+      menu="zmi_actions"
+      title="Manage Lock"
+      icon="/@@/lock.gif"
+      action="manage_token.html"
+      permission="zope.Public"
+      filter="context/@@inToken"
+      /> 
+
+  <menuItem
+      for="*"
+      menu="zmi_actions"
+      title="View Lock"
+      icon="/@@/lockedout.gif"
+      action="manage_token.html"
+      permission="zope.Public"
+      filter="context/@@lockedOut"
+      /> 
+
+</zope:configure>

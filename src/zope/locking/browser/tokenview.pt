@@ -1,0 +1,120 @@
+<html metal:use-macro="context/@@standard_macros/view"
+      i18n:domain="zope.locking">
+<head>
+</head>
+<body>
+<div metal:fill-slot="body">
+  <form method="post" tal:attributes="
+      action request/URL;
+      id string:${view/prefix}.form">
+    <tal:block condition="not: view/broker" i18n:translate="">
+      This object cannot be locked.
+    </tal:block>
+    <tal:block condition="view/broker">
+      <div tal:condition="not: view/token">
+        <h1 i18n:translate="">This object is not locked.</h1>
+        <input type="submit" tal:condition="view/canLock"
+            i18n:attributes="value" name="doLock" value="Lock"
+            tal:attributes="name string:${view/prefix}.doLock" />
+        <input type="submit" tal:condition="view/canLockShared"
+            i18n:attributes="value" name="doLockShared" value="Lock with others"
+            tal:attributes="name string:${view/prefix}.doLockShared" />
+        <input type="submit" tal:condition="view/canFreeze"
+            i18n:attributes="value" name="doFreeze" value="Freeze"
+            tal:attributes="name string:${view/prefix}.doFreeze" />
+      </div>
+      <div tal:condition="view/token">
+        <h1 tal:condition="view/isExclusiveLock" i18n:translate="">
+          This object is locked exclusively.
+        </h1>
+        <div tal:condition="view/isSharedLock">
+          <h1 i18n:translate="">
+          This object is locked.
+          </h1>
+          <input type="submit" tal:condition="view/canJoin"
+              i18n:attributes="value" name="doLockJoin" value="Join lock"
+              tal:attributes="name string:${view/prefix}.doLockJoin" />
+        </div>
+        <h1 tal:condition="view/isFreeze" i18n:translate="">
+          This object is permanently frozen.
+        </h1>
+        <h1 tal:condition="view/isEndableFreeze" i18n:translate="">
+          This object is temporarily frozen.
+        </h1>
+        <p tal:condition="view/expiring|nothing">
+          <tal:block i18n:translate="">
+            The lock will automatically expire in approximately
+          </tal:block>
+          <span tal:replace="view/remaining_duration" />
+        </p>
+        <table>
+          <tr>
+            <th i18n:translate="" valign="top">Started</th>
+            <td tal:content="view/started">(date)</td>
+          </tr>
+          <tr tal:condition="view/participants">
+            <th valign="top">
+              <span tal:condition="view/multiParticipants"
+                  i18n:translate="">Participants</span>
+              <span tal:condition="view/singleParticipant"
+                  i18n:translate="">Participant</span>
+            </th>
+            <td>
+              <div tal:repeat="principal_info view/participants">
+                <img tal:condition="principal_info/isGroup" alt="group"
+                    i18n:attributes="alt" tal:attributes="
+                    src context/++resource++group_icon.gif"
+                    src="/@@/group_icon.gif" />
+                <img tal:condition="not: principal_info/isGroup" alt="user"
+                    i18n:attributes="alt" tal:attributes="
+                    src context/++resource++user_icon.gif"
+                    src="/@@/user_icon.gif" />
+                <span tal:content="principal_info/principal/title"
+                  tal:condition="not:principal_info/isRequestPrincipal">
+                  Principal title</span>
+                <tal:block condition="principal_info/isRequestPrincipal">
+                  <span tal:content="principal_info/principal/title">
+                    Principal title
+                  </span>
+                  <span tal:condition="view/canRelease|nothing">
+                    <input type="submit" i18n:attributes="value"
+                        name="doRelease" value="Release" tal:attributes="
+                        name string:${view/prefix}.doRelease" />
+                  </span>
+                </tal:block>
+              </div>
+            </td>
+          </tr>
+          <tr tal:condition="view/isEndable">
+            <th i18n:translate="" valign="top">Expiration</th>
+            <td>
+              <div class="widget" tal:condition="nocall: view/widget|nothing">
+                <span tal:replace="structure view/widget">
+                    expiration widget</span>
+                <input type="submit" i18n:attributes="value"
+                    name="doChangeExpiration" value="Change" tal:attributes="
+                    name string:${view/prefix}.doChangeExpiration" />
+              </div>
+              <tal:block tal:condition="nocall: not: view/widget|nothing">
+                <span tal:replace="view/expiration"
+                    tal:condition="view/expiring">
+                  <span tal:condition="not:view/expiring" i18n:translate="">
+                    Never</span>
+                </span>
+              </tal:block>
+              <div tal:condition="view/canEnd">
+                <input type="submit" i18n:attributes="value"
+                    tal:condition="
+                    python:view.othersInToken or view.noParticipants"
+                    name="doEnd" value="Force Expiration Now" tal:attributes="
+                    name string:${view/prefix}.doEnd" />
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </tal:block>
+  </form>
+</div>
+</body>
+</html>

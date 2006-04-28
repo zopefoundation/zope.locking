@@ -5,7 +5,7 @@ from zope import interface, component, event
 
 from zope.app.keyreference.interfaces import IKeyReference
 
-from zope.app.location import Location
+from zope.location import Location
 
 from zope.locking import interfaces, utils
 from zope.locking.i18n import _

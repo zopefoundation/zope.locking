@@ -1,5 +1,5 @@
 import unittest
-from zope.app.tests import placelesssetup
+from zope.app.testing import placelesssetup
 from zope.testing import doctest 
 
 def setUp(test):

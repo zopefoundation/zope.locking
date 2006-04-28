@@ -679,13 +679,15 @@ utility in a site package, so that it would be persistent, but for this
 demonstration we are simplifying the regsitration.
 
     >>> component.provideUtility(util, provides=interfaces.ITokenUtility)
+
     >>> import zope.component.interfaces
-    >>> @interface.implementer(zope.component.interfaces.ISiteManager)
+    >>> @interface.implementer(zope.component.interfaces.IComponentLookup)
     ... @component.adapter(interface.Interface)
     ... def siteManager(obj):
     ...     return component.getGlobalSiteManager()
     ...
     >>> component.provideAdapter(siteManager)
+
     >>> from zope.locking import adapters
     >>> component.provideAdapter(adapters.TokenBroker)
     >>> broker = interfaces.ITokenBroker(demo)

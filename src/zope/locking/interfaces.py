@@ -18,9 +18,9 @@ $Id: $
 """
 from zope import interface, schema
 
-from zope.app.event.interfaces import IObjectEvent
+from zope.component.interfaces import IObjectEvent
 from zope.interface.common.mapping import IMapping
-from zope.app.event.objectevent import ObjectEvent
+from zope.component.interfaces import ObjectEvent
 from zope.locking.i18n import _
 
 ##############################################################################

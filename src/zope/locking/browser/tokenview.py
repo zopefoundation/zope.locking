@@ -4,7 +4,7 @@ from zope import component, schema
 from zope.interface.common.idatetime import ITZInfo
 from zope.security.checker import canAccess, canWrite
 from zope.security.interfaces import IGroup
-import zope.formlib.page
+import zope.publisher.browser
 import zope.formlib.namedtemplate
 
 from zope.app.publisher.interfaces.browser import IBrowserMenuItem
@@ -19,7 +19,7 @@ from zope.locking.i18n import _
 UNAVAILABLE = _('This action is unavailable now')
 ERROR = _('Bad expiration date value')
 
-class ManageTokenView(zope.formlib.page.Page):
+class ManageTokenView(zope.publisher.browser.BrowserPage):
 
     prefix="manage_tokens"
 

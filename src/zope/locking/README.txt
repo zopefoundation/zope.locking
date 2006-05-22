@@ -1071,9 +1071,10 @@ ability to mutate the tokens--`end`, `add` and `remove` methods, for
 instance--should be protected with an administrator-type permission such as
 'zope.Security'.  Setting the timeout properties on the token should be
 protected in the same way.  Setting the handlers attributes can have a less
-restrictive setting, since they
+restrictive setting, since they calculate security themselves on the basis of
+lock membership.
 
-On the adapter, the `breaklock` method should be protected with the same or
+On the adapter, the `end` method should be protected with the same or
 similar permission.  Calling methods such as lock and lockShared should be
 protected with something like 'zope.ManageContent'.  Getting attributes should
 be 'zope.View' or 'zope.Public', and unlocking and setting the timeouts, since

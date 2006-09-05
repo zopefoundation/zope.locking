@@ -14,8 +14,8 @@ class TokenBroker(object):
         self.utility = component.getUtility(
             interfaces.ITokenUtility, context=context)
 
-
-    def lock(self, principal_id=None, duration=None):
+    # for subclasses to call, to avoid duplicating code
+    def _getLockPrincipalId(self, principal_id):
         interaction_principals = getInteractionPrincipals()
         if principal_id is None:
             if (interaction_principals is None or
@@ -25,10 +25,15 @@ class TokenBroker(object):
         elif (interaction_principals is None or
               principal_id not in interaction_principals):
             raise interfaces.ParticipationError
+        return principal_id
+
+    def lock(self, principal_id=None, duration=None):
+        principal_id = self._getLockPrincipalId(principal_id)
         return self.utility.register(
             tokens.ExclusiveLock(self.context, principal_id, duration))
 
-    def lockShared(self, principal_ids=None, duration=None):
+    # for subclasses to call, to avoid duplicating code
+    def _getSharedLockPrincipalIds(self, principal_ids):
         interaction_principals = getInteractionPrincipals()
         if principal_ids is None:
             if (interaction_principals is None or
@@ -38,6 +43,10 @@ class TokenBroker(object):
         elif (interaction_principals is None or
               set(principal_ids).difference(interaction_principals)):
             raise interfaces.ParticipationError
+        return principal_ids
+
+    def lockShared(self, principal_ids=None, duration=None):
+        principal_ids = self._getSharedLockPrincipalIds(principal_ids)
         return self.utility.register(
             tokens.SharedLock(self.context, principal_ids, duration))
 

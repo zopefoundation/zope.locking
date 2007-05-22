@@ -7,6 +7,6 @@ setup(
     package_dir={'':'src'},
     namespace_packages=['zope'],
     include_package_data=True,
-    install_requirements = ['setuptools'],
+    install_requires = ['setuptools'],
     zip_safe = False
     )

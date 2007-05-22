@@ -39,6 +39,7 @@ class TokenUtility(persistent.Persistent, Location):
 
     def _cleanup(self):
         "clean out expired keys"
+        expiredkeys = []
         for k in self._expirations.keys(max=utils.now()):
             for token in self._expirations[k]:
                 assert token.ended
@@ -46,6 +47,8 @@ class TokenUtility(persistent.Persistent, Location):
                     self._del(self._principal_ids, token, p)
                 key_ref = IKeyReference(token.context)
                 del self._locks[key_ref]
+            expiredkeys.append(k)
+        for k in expiredkeys:
             del self._expirations[k]
 
     def register(self, token):

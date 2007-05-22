@@ -325,13 +325,40 @@ cleared appropriately.
     >>> list(util._expirations[new_lock.expiration]) == [new_lock]
     True
 
+An issue arose when two or more expired locks are stored in the utility. When
+we tried to add a third lock token the cleanup method incorrectly tried to
+clean up the the lock token we were trying to add.
+
+    >>> second_demo = Demo()
+    >>> second_lock = util.register(
+    ...    tokens.ExclusiveLock(second_demo, 'john', THREE_HOURS))
+
+    >>> len(util._expirations)
+    2
+
+Now expire the two registered tokens. The offset is currently 3 hours from now
+and the tokens have a duration of 3 hours so increase by 7 hours.
+
+    >>> offset = THREE_HOURS + FOUR_HOURS
+
+Register the third lock token.
+
+    >>> third_demo = Demo()
+    >>> third_lock = util.register(
+    ...    tokens.ExclusiveLock(third_demo, 'michael', ONE_HOUR))
+
+    >>> len(util._expirations)
+    1
+    >>> list(util._expirations[third_lock.expiration]) == [third_lock]
+    True
+
 Explicit Ending
 ---------------
 
 If I end all the tokens, it should remove all records from the indexes.
 
     >>> freeze.end()
-    >>> new_lock.end()
+    >>> third_lock.end()
     >>> len(util._locks)
     0
     >>> len(util._principal_ids)

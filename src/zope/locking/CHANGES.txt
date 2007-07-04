@@ -3,6 +3,17 @@ Changes
 =======
 
 ---
+1.1
+---
+
+(series for Zope 3.4; eggs)
+
+1.1b
+----
+
+- converted to use eggs
+
+---
 1.0
 ---
 

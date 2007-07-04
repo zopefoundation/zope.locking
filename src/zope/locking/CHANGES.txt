@@ -1,0 +1,14 @@
+=======
+Changes
+=======
+
+---
+1.0
+---
+
+(series for Zope 3.3; no dependencies on Zope eggs)
+
+1.0b
+----
+
+Initial non-dev release

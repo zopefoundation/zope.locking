@@ -23,7 +23,6 @@ setup(
         'zope.publisher',
         'zope.formlib',
         'zope.app.publisher',
-        'zope.app.zapi',
         'zc.i18n',
         'pytz',
         ],

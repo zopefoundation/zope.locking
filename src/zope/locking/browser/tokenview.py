@@ -8,7 +8,7 @@ import zope.publisher.browser
 import zope.formlib.namedtemplate
 
 from zope.app.publisher.interfaces.browser import IBrowserMenuItem
-from zope.app import zapi
+from zope.app.security.interfaces import IAuthentication
 
 from zope.locking import interfaces
 import zc.i18n.date
@@ -106,7 +106,7 @@ class ManageTokenView(zope.publisher.browser.BrowserPage):
                     token.started.astimezone(tzinfo))
                 self.othersInToken = self.inToken = False
                 self.participants = []
-                principals = zapi.principals()
+                principals = component.getUtility(IAuthentication)
                 ct = len(list(token.principal_ids))
                 self.noParticipants = ct == 0
                 self.singleParticipant = ct == 1

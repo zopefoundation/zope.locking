@@ -2,6 +2,28 @@
 Changes
 =======
 
+
+----------------
+1.2 (unreleased)
+----------------
+
+- Bug fix: tokens were stored in a manner that prevented them from
+  being cleaned up properly in the utility's _principal_ids mapping.
+  Make zope.locking.tokens.Token orderable to fix this, as tokens
+  are stored as keys in BTrees.
+
+- Add a zope.app.generations Schema Manager to clean up any lingering
+  tokens due to this bug.  Token utilities not accessible through the
+  component registry can be cleaned up manually with
+  zope.locking.generations.fix_token_utility.
+
+- TokenUtility's register method will now add the token to the utility's
+  database connection if the token provides IPersistent.
+
+- Clean up the tests and docs and move some common code to testing.py.
+
+- Fix some missing imports.
+
 ---
 1.1
 ---

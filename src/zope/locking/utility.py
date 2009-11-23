@@ -1,4 +1,5 @@
 import persistent
+import persistent.interfaces
 
 from BTrees.OOBTree import OOBTree, OOTreeSet
 from zope import interface, component, event
@@ -20,15 +21,10 @@ class TokenUtility(persistent.Persistent, Location):
 
     def _del(self, tree, token, value):
         """remove a token for a value within either of the two index trees"""
-        reg = tree.get(value)
-        if reg is not None:
-            try:
-                reg.remove(token)
-            except KeyError:
-                pass
-            else:
-                if not len(reg):
-                    del tree[value]
+        reg = tree[value]
+        reg.remove(token)
+        if not reg:
+            del tree[value]
 
     def _add(self, tree, token, value):
         """add a token for a value within either of the two index trees"""
@@ -57,6 +53,8 @@ class TokenUtility(persistent.Persistent, Location):
             token.utility = self
         elif token.utility is not self:
             raise ValueError('Lock is already registered with another utility')
+        if persistent.interfaces.IPersistent.providedBy(token):
+            self._p_jar.add(token)
         key_ref = IKeyReference(token.context)
         current = self._locks.get(key_ref)
         if current is not None:

@@ -18,9 +18,7 @@ $Id: $
 """
 from zope import interface, schema
 
-from zope.component.interfaces import IObjectEvent
-from zope.interface.common.mapping import IMapping
-from zope.component.interfaces import ObjectEvent
+from zope.component.interfaces import IObjectEvent, ObjectEvent
 from zope.locking.i18n import _
 
 ##############################################################################
@@ -33,7 +31,7 @@ class ITokenUtility(interface.Interface):
 
     def get(obj, default=None):
         """For obj, return active IToken or default.
-        
+
         Token must be active (not ended), or else return default.
         """
 
@@ -47,11 +45,11 @@ class ITokenUtility(interface.Interface):
 
     def register(token):
         """register an IToken, or a change to a previously-registered token.
-        
+
         If the token has not yet been assigned a `utility` value, sets the
         `utility` attribute of the token to self, to mark registration.
         Raises ValueError if token has been registered to another utility.
-        
+
         If lock has never been registered before, fires TokenStartedEvent.
         """
 
@@ -61,7 +59,7 @@ class ITokenUtility(interface.Interface):
 
 class IAbstractToken(interface.Interface):
     """A token.  Must be registered with token utility to start.
-    
+
     This is the core token interface.  This core interface is mostly readonly.
     It is used as a base by both tokens and token handlers.
     """
@@ -74,7 +72,7 @@ class IAbstractToken(interface.Interface):
 
     utility = interface.Attribute(
         """The lock utility in charge of this lock.
-        
+
         Should *only* ever be set once by ILockUtility.register method.
         When the utility sets this attribute, the `start` attribute should
         be set and the token should be considered active (potentially; see
@@ -93,7 +91,7 @@ class IAbstractToken(interface.Interface):
 
 class IEndable(interface.Interface):
     """A mixin for tokens that may be ended explicitly or timed out.
-    
+
     Some tokens are endable; locks, for instance, are endable.  Freezes may be
     permanent, so some are not IEndable.
     """
@@ -130,7 +128,7 @@ class IEndable(interface.Interface):
 
     def end():
         """explicitly expire the token.
-        
+
         fires TokenEndedEvent if successful, or raises EndedError
         if the token has already ended."""
 
@@ -142,7 +140,7 @@ class IEndable(interface.Interface):
 
 class IToken(IAbstractToken):
     """a token that actually stores data.
-    
+
     This is the sort of token that should be used in the token utility."""
 
     __parent__ = interface.Attribute(
@@ -193,7 +191,7 @@ class IEndableToken(IToken, IEndable):
 
 class IExclusiveLock(IEndableToken):
     """a lock held to one and only one principal.
-    
+
     principal_ids must always have one and only one member."""
 
 class ISharedLock(IEndableToken):
@@ -201,25 +199,25 @@ class ISharedLock(IEndableToken):
 
     def add(principal_ids):
         """Share this lock with principal_ids.
-        
+
         Adding principals that already are part of the lock can be ignored.
-        
+
         If ended, raise EndedError.
         """
 
     def remove(principal_ids):
         """Remove principal_ids from lock.
-        
+
         Removing all principals removes the lock: there may not be an effective
-        shared lock shared to noone.
-        
+        shared lock shared to no one.
+
         Removing principals that are not part of the lock can be ignored.
-        
+
         If ended, raise EndedError."""
 
 class IFreeze(IToken):
     """principal_ids must always be empty.
-    
+
     May not be ended."""
 
 class IEndableFreeze(IFreeze, IEndableToken):
@@ -231,7 +229,7 @@ class IEndableFreeze(IFreeze, IEndableToken):
 
 class ITokenBroker(interface.Interface):
     """for one object, create standard endable tokens and get active ITokens.
-    
+
     Convenient adapter model for security: broker is in context of affected
     object, so security settings for the object can be obtained automatically.
     """
@@ -244,25 +242,25 @@ class ITokenBroker(interface.Interface):
 
     def lock(principal_id=None, duration=None):
         """lock context, and return token.
-        
+
         if principal_id is None, use interaction's principal; if interaction
         does not have one and only one principal, raise ValueError.
-        
+
         if principal_id is not None, principal_id must be in interaction,
         or else raise ParticipationError.
-        
+
         Same constraints as token utility's register method.
         """
 
     def lockShared(principal_ids=None, duration=None):
         """lock context with a shared lock, and return token.
-        
+
         if principal_ids is None, use interaction's principals; if interaction
         does not have any principals, raise ValueError.
-        
+
         if principal_ids is not None, principal_ids must be in interaction,
         or else raise ParticipationError.  Must be at least one id.
-        
+
         Same constraints as token utility's register method.
         """
 
@@ -282,9 +280,9 @@ class ITokenBroker(interface.Interface):
 
 class ITokenHandler(IAbstractToken, IEndable):
     """give appropriate increased access in a security system.
-    
+
     Appropriate for endable tokens with one or more principals (for instance,
-    niether freezes nor endable freezes."""
+    neither freezes nor endable freezes."""
 
     __parent__ = interface.Attribute(
         """the actual token.  readonly.  Important for security.""")
@@ -332,9 +330,9 @@ class ITokenHandler(IAbstractToken, IEndable):
         All explicitly given principal_ids must be in interaction.  Silently
         ignores requests to remove principals who are not currently part of
         token.
-        
+
         Ends the lock if the removed principals were the only principals.
-        
+
         Raises EndedError if lock has already ended.
         """
 
@@ -351,7 +349,7 @@ class ISharedLockHandler(ITokenHandler):
         All explicitly given principal_ids must be in interaction.  Silently
         ignores requests to add principal_ids that are already part of the
         token.
-        
+
         Raises EndedError if lock has already ended.
         """
 
@@ -371,10 +369,10 @@ class ITokenEvent(IObjectEvent):
 
 class ITokenStartedEvent(ITokenEvent):
     """An token has started"""
-    
+
 class ITokenEndedEvent(ITokenEvent):
     """A token has been explicitly ended.
-    
+
     Note that this is not fired when a lock expires."""
 
 class IPrincipalsChangedEvent(ITokenEvent):
@@ -384,7 +382,7 @@ class IPrincipalsChangedEvent(ITokenEvent):
 
 class IExpirationChangedEvent(ITokenEvent):
     """Expiration value changed for a token"""
-    
+
     old = interface.Attribute('the old expiration value')
 
 # events

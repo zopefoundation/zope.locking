@@ -4,10 +4,11 @@ from zope import component, schema
 from zope.interface.common.idatetime import ITZInfo
 from zope.security.checker import canAccess, canWrite
 from zope.security.interfaces import IGroup
+import zope.app.form.interfaces
+import zope.app.pagetemplate
 import zope.publisher.browser
 import zope.formlib.namedtemplate
 
-from zope.app.publisher.interfaces.browser import IBrowserMenuItem
 from zope.app.security.interfaces import IAuthentication
 
 from zope.locking import interfaces

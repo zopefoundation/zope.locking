@@ -10,37 +10,13 @@ This is some setup that the tests need.
     True
 
     >>> from zope import interface, component
-    >>> import zope.app.keyreference.interfaces
-    >>> class IDemo(interface.Interface):
-    ...     """a demonstration interface for a demonstration class"""
-    ...
-    >>> class Demo(object):
-    ...     interface.implements(IDemo)
-    ...
-    >>> class DemoKeyReference(object):
-    ...     component.adapts(IDemo)
-    ...     _class_counter = 0
-    ...     interface.implements(
-    ...         zope.app.keyreference.interfaces.IKeyReference)
-    ...     def __init__(self, context):
-    ...         self.context = context
-    ...         class_ = type(self)
-    ...         self._id = getattr(context, '__demo_key_reference__', None)
-    ...         if self._id is None:
-    ...             self._id = class_._class_counter
-    ...             context.__demo_key_reference__ = self._id
-    ...             class_._class_counter += 1
-    ...     key_type_id = 'zope.locking.README.DemoKeyReference'
-    ...     def __call__(self):
-    ...         return self.context
-    ...     def __hash__(self):
-    ...         return (self.key_type_id, self._id)
-    ...     def __cmp__(self, other):
-    ...         if self.key_type_id == other.key_type_id:
-    ...             return cmp(self._id, other._id)
-    ...         return cmp(self.key_type_id, other.key_type_id) 
-    ...
-    >>> component.provideAdapter(DemoKeyReference)
+
+    >>> class Connection(object):
+    ...     def add(self, obj):
+    ...         pass
+    ...     def db(self):
+    ...         raise Exception()
+    >>> util._p_jar = Connection()
 
     >>> import datetime
     >>> import pytz
@@ -125,7 +101,7 @@ check and modify the remaining_duration attribute.
     >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
     >>> lock.duration
     datetime.timedelta(0, 14400)
-    >>> two >= lock.remaining_duration >= one 
+    >>> two >= lock.remaining_duration >= one
     True
     >>> lock.remaining_duration -= datetime.timedelta(hours=1)
     >>> one >= lock.remaining_duration >= datetime.timedelta()
@@ -184,7 +160,7 @@ EndableFreezes
 --------------
 
 An endable freeze token is similar to a lock token except that it grants the
-'lock' to noone.
+'lock' to no one.
 
     >>> token = util.register(tokens.EndableFreeze(demo))
     >>> ev = events[-1]
@@ -330,7 +306,7 @@ check and modify the remaining_duration attribute.
     >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
     >>> token.duration
     datetime.timedelta(0, 14400)
-    >>> two >= token.remaining_duration >= one 
+    >>> two >= token.remaining_duration >= one
     True
     >>> token.remaining_duration -= one
     >>> one >= token.remaining_duration >= datetime.timedelta()

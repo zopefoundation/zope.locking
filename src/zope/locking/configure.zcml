@@ -11,7 +11,7 @@
   <!-- the annotations mapping -->
   <class class=".tokens.AnnotationsMapping">
     <require permission="zope.View"
-      interface="zope.interface.common.mapping.IEnumerableMapping" 
+      interface="zope.interface.common.mapping.IEnumerableMapping"
       />
   </class>
 
@@ -20,7 +20,7 @@
     <require permission="zope.View"
       attributes="context utility principal_ids started annotations" />
   </class>
-  
+
   <class class=".tokens.ExclusiveLock">
     <require like_class=".tokens.Freeze" />
     <require permission="zope.View"
@@ -29,17 +29,17 @@
       attributes="end"
       set_attributes="expiration duration remaining_duration" />
   </class>
-  
+
   <class class=".tokens.SharedLock">
     <require like_class=".tokens.ExclusiveLock" />
     <require permission="zope.Security"
       attributes="add remove" />
   </class>
-  
+
   <class class=".tokens.EndableFreeze">
     <require like_class=".tokens.ExclusiveLock" />
   </class>
-  
+
   <!-- token broker -->
   <class class=".adapters.TokenBroker">
     <require permission="zope.ManageContent"
@@ -49,9 +49,9 @@
     <require permission="zope.Security"
       attributes="freeze" />
   </class>
-  
+
   <adapter factory=".adapters.TokenBroker" trusted="1" />
-  
+
   <!-- token handlers -->
   <class class=".adapters.ExclusiveLockHandler">
     <require permission="zope.View"
@@ -63,19 +63,25 @@
     <require permission="zope.Public" attributes="release"
       set_attributes="expiration duration remaining_duration" />
   </class>
-  
+
   <adapter factory=".adapters.ExclusiveLockHandler" trusted="1" />
-  
+
   <class class=".adapters.SharedLockHandler">
     <require like_class=".adapters.ExclusiveLockHandler" />
     <require permission="zope.Security" attributes="join" />
     <!-- add has its own security policy -->
     <require permission="zope.Public" attributes="add" />
   </class>
-  
+
   <adapter factory=".adapters.SharedLockHandler" trusted="1" />
 
   <include package=".browser" />
+
+  <utility
+     name="zope.locking"
+     provides="zope.app.generations.interfaces.ISchemaManager"
+     component=".generations.schemaManager"
+    />
 
   <configure
     xmlns:zcml="http://namespaces.zope.org/zcml"

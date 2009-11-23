@@ -4,7 +4,7 @@ probably only be of interest to package maintainers, rather than package
 users.
 
 The token utility keeps three indexes of the tokens.  The primary index,
-`_locks`, is a mapping of 
+`_locks`, is a mapping of
 
   <key reference to content object>: (
       <token>,
@@ -13,7 +13,7 @@ The token utility keeps three indexes of the tokens.  The primary index,
 
 The utility's `get` method uses this data structure, for instance.
 
-Another index, `_principal_ids`, maps <principal id> to <set of <tokens>>. 
+Another index, `_principal_ids`, maps <principal id> to <set of <tokens>>.
 Its use is the `iterForPrincipalId` methods.
 
 The last index, `_expirations`, maps <token expiration datetimes> to <set of
@@ -31,48 +31,15 @@ There are three cases in which these data structures need to be updated:
 - a token changes and needs to be reindexed.
 
 Let's run through some examples and check the data structures as we go.  We'll
-need to start with some setup.  This is identical to the setups in the other
-tex files in this directory, so if you've worked throught this before, skip
-past this code.
+need to start with some setup.
 
     >>> from zope.locking import utility, interfaces, tokens
+    >>> from zope.app.keyreference.interfaces import IKeyReference
     >>> util = utility.TokenUtility()
+    >>> conn.add(util)
     >>> from zope.interface.verify import verifyObject
     >>> verifyObject(interfaces.ITokenUtility, util)
     True
-
-    >>> from zope import interface, component
-    >>> import zope.app.keyreference.interfaces
-    >>> class IDemo(interface.Interface):
-    ...     """a demonstration interface for a demonstration class"""
-    ...
-    >>> class Demo(object):
-    ...     interface.implements(IDemo)
-    ...
-    >>> class DemoKeyReference(object):
-    ...     component.adapts(IDemo)
-    ...     _class_counter = 0
-    ...     interface.implements(
-    ...         zope.app.keyreference.interfaces.IKeyReference)
-    ...     def __init__(self, context):
-    ...         self.context = context
-    ...         class_ = type(self)
-    ...         self._id = getattr(context, '__demo_key_reference__', None)
-    ...         if self._id is None:
-    ...             self._id = class_._class_counter
-    ...             context.__demo_key_reference__ = self._id
-    ...             class_._class_counter += 1
-    ...     key_type_id = 'zope.locking.README.DemoKeyReference'
-    ...     def __call__(self):
-    ...         return self.context
-    ...     def __hash__(self):
-    ...         return (self.key_type_id, self._id)
-    ...     def __cmp__(self, other):
-    ...         if self.key_type_id == other.key_type_id:
-    ...             return cmp(self._id, other._id)
-    ...         return cmp(self.key_type_id, other.key_type_id) 
-    ...
-    >>> component.provideAdapter(DemoKeyReference)
 
     >>> import datetime
     >>> import pytz
@@ -199,8 +166,7 @@ Now `_locks` has two indexed objects.
 
     >>> len(util._locks)
     2
-    >>> token, principals, expiration = util._locks[
-    ...     zope.app.keyreference.interfaces.IKeyReference(frozen)]
+    >>> token, principals, expiration = util._locks[IKeyReference(frozen)]
     >>> token is freeze
     True
     >>> len(principals)
@@ -240,8 +206,7 @@ However, if we look at the indexes, no changes have been made yet.
 
     >>> len(util._locks)
     2
-    >>> token, principals, expiration = util._locks[
-    ...     zope.app.keyreference.interfaces.IKeyReference(demo)]
+    >>> token, principals, expiration = util._locks[IKeyReference(demo)]
     >>> token is lock
     True
     >>> sorted(principals)
@@ -264,9 +229,8 @@ We'll make this one expire an hour later.
 
 Now all the indexes should have removed the references to the old lock.
 
-    >>> sorted(util._locks) == sorted((
-    ...         zope.app.keyreference.interfaces.IKeyReference(frozen),
-    ...         zope.app.keyreference.interfaces.IKeyReference(another_demo)))
+    >>> sorted(util._locks) == sorted((IKeyReference(frozen),
+    ...                                IKeyReference(another_demo)))
     True
     >>> sorted(util._principal_ids)
     ['john']
@@ -289,7 +253,7 @@ changes will have been made.
     >>> len(util._locks)
     2
     >>> token, principals, expiration = util._locks[
-    ...     zope.app.keyreference.interfaces.IKeyReference(another_demo)]
+    ...     IKeyReference(another_demo)]
     >>> token is lock
     True
     >>> sorted(principals)
@@ -311,7 +275,7 @@ cleared appropriately.
     >>> len(util._locks)
     2
     >>> token, principals, expiration = util._locks[
-    ...     zope.app.keyreference.interfaces.IKeyReference(another_demo)]
+    ...     IKeyReference(another_demo)]
     >>> token is new_lock
     True
     >>> sorted(principals)
@@ -365,5 +329,127 @@ If I end all the tokens, it should remove all records from the indexes.
     0
     >>> len(util._expirations)
     0
+
+
+Demo
+----
+
+The following is a regression test for a bug which prevented the token
+utility from cleaning up expired tokens correctly; perhaps it is also a
+somewhat more realistic demonstration of some interactions with the utility
+in that it uses multiple connections to the database.
+
+    >>> offset = NO_TIME
+    >>> import persistent
+    >>> import transaction
+
+    >>> def populate(principal, conn, duration=None, n=100):
+    ...   """Add n tokens for principal to the db using conn as the connection
+    ...      to the db.
+    ...   """
+    ...   t = conn.transaction_manager.begin()
+    ...   util = token_util(conn)
+    ...   for i in range(n):
+    ...     obj = persistent.Persistent()
+    ...     conn.add(obj)
+    ...     lock = tokens.ExclusiveLock(obj, principal, duration=duration)
+    ...     ignored = util.register(lock)
+    ...   t.commit()
+    >>> def end(principal, conn, n=None):
+    ...   """End n tokens for the given principal using conn as the connection
+    ...      to the db.
+    ...   """
+    ...   t = conn.transaction_manager.begin()
+    ...   locks = list(token_util(conn).iterForPrincipalId(principal))
+    ...   res = len(map(lambda l: l.end(), locks[:n]))
+    ...   t.commit()
+    ...   return res
+    >>> def get_locks(principal, conn):
+    ...   """Retrieves a list of locks for the principal using conn as the
+    ...      connection to the db.
+    ...   """
+    ...   t = conn.transaction_manager.begin()
+    ...   try:
+    ...     return list(token_util(conn)._principal_ids[principal])
+    ...   except KeyError:
+    ...     return []
+
+    >>> tm1 = transaction.TransactionManager()
+    >>> tm2 = transaction.TransactionManager()
+
+    >>> conn1 = db.open(transaction_manager=tm1)
+    >>> conn2 = db.open(transaction_manager=tm2)
+
+We "install" the token utility.
+
+    >>> conn1.root()['token_util'] = zope.locking.utility.TokenUtility()
+    >>> token_util = lambda conn: conn.root()['token_util']
+    >>> tm1.commit()
+
+First, we fill the token utility with 100 locks through connection 1
+under the principal id of 'Dwight Holly'.
+
+    >>> populate('Dwight Holly', conn1)
+
+Via connection 2, we end 50 of Dwight's locks.
+
+    >>> n = end('Dwight Holly', conn2, 50)
+
+In connection 1, we verify that 50 locks have been removed.
+
+    >>> len(get_locks('Dwight Holly', conn1)) == 100 - n
+    True
+
+Now we end the rest of the locks through connection 2.
+
+    >>> ignored = end('Dwight Holly', conn2)
+
+And verify through connection 1 that Dwight now has no locks in the utility.
+
+    >>> get_locks('Dwight Holly', conn1) == []
+    True
+    >>> 'Dwight Holly' in token_util(conn1)._principal_ids
+    False
+
+Dwight gets 100 more locks through connection 1, however this time they are
+all set to expire in 10 minutes.
+
+    >>> populate('Dwight Holly', conn1, duration=datetime.timedelta(minutes=10))
+
+We sync connection 2 so we can see that the locks are indeed there.
+
+    >>> conn2.sync()
+    >>> util = token_util(conn2)
+    >>> 'Dwight Holly' in util._principal_ids
+    True
+    >>> len(util._expirations) > 0
+    True
+
+Now we time-travel one hour into the future, where Dwight's locks have long
+since expired.
+
+    >>> offset = ONE_HOUR
+
+Adding a new lock through connection 2 will trigger a cleanup...
+
+    >>> populate('Pete Bondurant', conn2)
+
+...at which point we can see via connection 1 that all of Dwight's locks
+are gone.
+
+    >>> conn1.sync()
+    >>> util = token_util(conn1)
+    >>> len(util._expirations)
+    0
+    >>> 'Dwight Holly' in util._principal_ids
+    False
+
+    >>> conn1.close()
+    >>> conn2.close()
+
+
+
+Clean Up
+--------
 
     >>> zope.locking.utils.now = oldNow # undo the time hack

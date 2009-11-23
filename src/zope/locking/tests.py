@@ -1,17 +1,39 @@
 import unittest
-from zope.app.testing import placelesssetup
-from zope.testing import doctest 
+
+import persistent.interfaces
+import ZODB.DB
+import ZODB.MappingStorage
+import transaction
+import zope.app.keyreference.interfaces
+import zope.app.keyreference.persistent
+import zope.app.testing.placelesssetup
+import zope.component
+import zope.event
+
+import zope.locking.testing
+
+from zope.testing import doctest
+
 
 def setUp(test):
-    placelesssetup.setUp(test)
+    zope.app.testing.placelesssetup.setUp(test)
+    db = test.globs['db'] = ZODB.DB(ZODB.MappingStorage.MappingStorage())
+    test.globs['conn'] = db.open()
+    test.globs['Demo'] = zope.locking.testing.Demo
+    zope.component.provideAdapter(zope.locking.testing.DemoKeyReference)
+    zope.component.provideAdapter(
+        zope.app.keyreference.persistent.KeyReferenceToPersistent,
+        [persistent.interfaces.IPersistent],
+        zope.app.keyreference.interfaces.IKeyReference)
     events = test.globs['events'] = []
-    import zope.event
     zope.event.subscribers.append(events.append)
 
 def tearDown(test):
-    placelesssetup.tearDown(test)
+    zope.app.testing.placelesssetup.tearDown(test)
+    transaction.abort()
+    test.globs['conn'].close()
+    test.globs['db'].close()
     events = test.globs.pop('events')
-    import zope.event
     assert zope.event.subscribers.pop().__self__ is events
     del events[:] # being paranoid
 
@@ -29,4 +51,4 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite') 
+    unittest.main(defaultTest='test_suite')

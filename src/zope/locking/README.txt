@@ -8,7 +8,7 @@ The zope.locking package provides three main features:
 
 - advisory shared locks for individual objects; and
 
-- frozen objects (locked to noone).
+- frozen objects (locked to no one).
 
 Locks and freezes by themselves are advisory tokens and inherently
 meaningless.  They must be given meaning by other software, such as a security
@@ -32,7 +32,8 @@ and thus manipulate, all active tokens in a system.
 The first object we'll introduce, then, is the TokenUtility: the utility that
 is responsible for the registration and the retrieving of tokens.
 
-    >>> from zope.locking import utility, interfaces
+    >>> from zope import component, interface
+    >>> from zope.locking import interfaces, utility, tokens
     >>> util = utility.TokenUtility()
     >>> from zope.interface.verify import verifyObject
     >>> verifyObject(interfaces.ITokenUtility, util)
@@ -41,44 +42,32 @@ is responsible for the registration and the retrieving of tokens.
 The utility only has a few methods--`get`, `iterForPrincipalId`,
 `__iter__`, and `register`--which we will look at below.  It is expected to be
 persistent, and the included implementation is in fact persistent.Persistent,
-and expects to be installed as a local utility.
+and expects to be installed as a local utility.  The utility needs a
+connection to the database before it can register persistent tokens.
+
+    >>> lock = tokens.ExclusiveLock(Demo(), 'Fantomas')
+    >>> util.register(lock)
+    Traceback (most recent call last):
+    ...
+    AttributeError: 'NoneType' object has no attribute 'add'
+
+    >>> conn.add(util)
+
+If the token provides IPersistent, the utility will add it to its connection.
+
+    >>> lock._p_jar is None
+    True
+
+    >>> lock = util.register(lock)
+    >>> lock._p_jar is util._p_jar
+    True
+
+    >>> lock.end()
+    >>> lock = util.register(lock)
+
 
 The standard token utility can accept tokens for any object that is adaptable
-to IKeyReference.  Here are some stubs to enable working with our token
-utility.
-
-    >>> from zope import interface, component
-    >>> import zope.app.keyreference.interfaces
-    >>> class IDemo(interface.Interface):
-    ...     """a demonstration interface for a demonstration class"""
-    ...
-    >>> class Demo(object):
-    ...     interface.implements(IDemo)
-    ...
-    >>> class DemoKeyReference(object):
-    ...     component.adapts(IDemo)
-    ...     _class_counter = 0
-    ...     interface.implements(
-    ...         zope.app.keyreference.interfaces.IKeyReference)
-    ...     def __init__(self, context):
-    ...         self.context = context
-    ...         class_ = type(self)
-    ...         self._id = getattr(context, '__demo_key_reference__', None)
-    ...         if self._id is None:
-    ...             self._id = class_._class_counter
-    ...             context.__demo_key_reference__ = self._id
-    ...             class_._class_counter += 1
-    ...     key_type_id = 'zope.locking.README.DemoKeyReference'
-    ...     def __call__(self):
-    ...         return self.context
-    ...     def __hash__(self):
-    ...         return (self.key_type_id, self._id)
-    ...     def __cmp__(self, other):
-    ...         if self.key_type_id == other.key_type_id:
-    ...             return cmp(self._id, other._id)
-    ...         return cmp(self.key_type_id, other.key_type_id) 
-    ...
-    >>> component.provideAdapter(DemoKeyReference)
+to IKeyReference.
 
     >>> import datetime
     >>> import pytz
@@ -110,7 +99,6 @@ configured to be).
 Here's an example of creating and registering an exclusive lock: the principal
 with an id of 'john' locks the demo object.
 
-    >>> from zope.locking import tokens 
     >>> lock = tokens.ExclusiveLock(demo, 'john')
     >>> res = util.register(lock)
     >>> res is lock
@@ -352,7 +340,7 @@ check and modify the remaining_duration attribute.
     >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
     >>> lock.duration
     datetime.timedelta(0, 14400)
-    >>> two >= lock.remaining_duration >= one 
+    >>> two >= lock.remaining_duration >= one
     True
     >>> lock.remaining_duration -= one
     >>> one >= lock.remaining_duration >= datetime.timedelta()
@@ -434,7 +422,7 @@ variable assignment can be chained, if desired.
     >>> ev.object is lock
     True
 
-Here, principals with ids of 'john' and 'mary' have locked the demo object. 
+Here, principals with ids of 'john' and 'mary' have locked the demo object.
 The returned token implements ISharedLock and provides a superset of the
 IExclusiveLock capabilities.  These next operations should all look familiar
 from the discussion of the ExclusiveLock tokens above.
@@ -463,7 +451,7 @@ from the discussion of the ExclusiveLock tokens above.
     >>> lock.ended >= lock.started
     True
 
-As mentioned, though, the SharedLock capabilities are a superset of the 
+As mentioned, though, the SharedLock capabilities are a superset of the
 ExclusiveLock ones.  There are two extra methods: `add` and `remove`.  These
 are able to add and remove principal ids as shared owners of the lock token.
 
@@ -576,7 +564,7 @@ EndableFreezes
 --------------
 
 An endable freeze token is similar to a lock token except that it grants the
-'lock' to noone.
+'lock' to no one.
 
     >>> token = util.register(tokens.EndableFreeze(demo))
     >>> verifyObject(interfaces.IEndableFreeze, token)
@@ -656,7 +644,7 @@ discussion so far.
 In the context of the Zope 3 security model, the first two needs are intended
 to be addressed by the ITokenBroker interface, and associated adapter; the last
 need is intended to be addressed by the ITokenHandler, and associated
-adpaters.
+adapters.
 
 ------------
 TokenBrokers
@@ -676,7 +664,7 @@ it tries to create it for the user in the current interaction.
 This won't work without an interaction, of course.  Notice that we start the
 example by registering the utility.  We would normally be required to put the
 utility in a site package, so that it would be persistent, but for this
-demonstration we are simplifying the regsitration.
+demonstration we are simplifying the registration.
 
     >>> component.provideUtility(util, provides=interfaces.ITokenUtility)
 
@@ -721,7 +709,7 @@ better chance.
     ...
     >>> zope.security.management.endInteraction()
     >>> zope.security.management.newInteraction(DemoParticipation(joe))
-    
+
     >>> token = broker.lock()
     >>> interfaces.IExclusiveLock.providedBy(token)
     True
@@ -800,7 +788,7 @@ interaction:
 With an interaction, the principals get the lock by default.
 
     >>> zope.security.management.newInteraction(DemoParticipation(joe))
-    
+
     >>> token = broker.lockShared()
     >>> interfaces.ISharedLock.providedBy(token)
     True
@@ -857,7 +845,7 @@ freeze
 ------
 
 The `freeze` method allows users to create an endable freeze.  It has no
-requirments on the interaction.  It should be protected carefully, from a 
+requirements on the interaction.  It should be protected carefully, from a
 security perspective.
 
     >>> token = broker.freeze()
@@ -889,7 +877,7 @@ The `get` method is exactly equivalent to the token utility's get method:
 it returns the current active token for the object, or None.  It is useful
 for protected code, since utilities typically do not get security assertions,
 and this method can get its security assertions from the object, which is
-often the righ place.
+often the right place.
 
 Again, the TokenBroker does embody some policy; if it is not good policy for
 your application, build your own interfaces and adapters that do.
@@ -905,7 +893,7 @@ then impose their own checks on the basis of the current interaction. They are
 very much policy, and other approaches may be useful. They are intended to be
 registered as trusted adapters.
 
-For exclusive locks and shared locks, then, we have token handlers. 
+For exclusive locks and shared locks, then, we have token handlers.
 Generally, token handlers give access to all of the same capabilities as their
 corresponding tokens, with the following additional constraints and
 capabilities:
@@ -926,7 +914,7 @@ section.
 ExclusiveLockHandlers
 ---------------------
 
-Given the general constraints described above, exclusive lock handers will
+Given the general constraints described above, exclusive lock handlers will
 generally only allow access to their special capabilities if the operation
 is in an interaction with only the lock owner.
 
@@ -1035,7 +1023,7 @@ principals in the current interaction join.
     ...
     ParticipationError
 
-The `add` method lets any principal ids be aded to the lock, but all
+The `add` method lets any principal ids be added to the lock, but all
 principals in the current interaction must be a part of the lock.
 
     >>> handler.add(('susan',))
@@ -1053,10 +1041,13 @@ principals in the current interaction must be a part of the lock.
 Warnings
 --------
 
-The token utility will register a token for an object if it can.  It does not
-check to see if it is actually the local token utility for the given object. 
-This should be arranged by clients of the token utility, and verified
-externally if desired.
+* The token utility will register a token for an object if it can.  It does not
+  check to see if it is actually the local token utility for the given object.
+  This should be arranged by clients of the token utility, and verified
+  externally if desired.
+
+* Tokens are stored as keys in BTrees, and therefore must be orderable
+  (i.e., they must implement __cmp__).
 
 -------------------------------
 Intended Security Configuration

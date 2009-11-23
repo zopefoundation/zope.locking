@@ -47,6 +47,10 @@ class Token(persistent.Persistent):
                 self._started = utils.now()
         return property(get, set)
 
+    def __cmp__(self, other):
+        return cmp((self._p_jar.db().database_name, self._p_oid),
+            (other._p_jar.db().database_name, other._p_oid))
+
 class EndableToken(Token):
 
     def __init__(self, target, duration=None):
@@ -172,14 +176,14 @@ class EndableToken(Token):
 
 class ExclusiveLock(EndableToken):
     interface.implements(interfaces.IExclusiveLock)
-    
+
     def __init__(self, target, principal_id, duration=None):
         self._principal_ids = frozenset((principal_id,))
         super(ExclusiveLock, self).__init__(target, duration)
 
 class SharedLock(EndableToken):
     interface.implements(interfaces.ISharedLock)
-    
+
     def __init__(self, target, principal_ids, duration=None):
         self._principal_ids = frozenset(principal_ids)
         super(SharedLock, self).__init__(target, duration)

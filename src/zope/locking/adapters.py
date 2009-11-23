@@ -1,6 +1,5 @@
 from zope import interface, component
 
-import zope.security.interfaces
 import zope.security.management
 
 from zope.locking import interfaces, tokens

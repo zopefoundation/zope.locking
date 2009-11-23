@@ -11,12 +11,7 @@ This is some setup that the tests need.
 
     >>> from zope import interface, component
 
-    >>> class Connection(object):
-    ...     def add(self, obj):
-    ...         pass
-    ...     def db(self):
-    ...         raise Exception()
-    >>> util._p_jar = Connection()
+    >>> conn.add(util)
 
     >>> import datetime
     >>> import pytz

@@ -4,7 +4,7 @@ Changes
 
 
 ----------------
-1.2 (unreleased)
+1.2 (2009-11-23)
 ----------------
 
 - Bug fix: tokens were stored in a manner that prevented them from

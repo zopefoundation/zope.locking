@@ -7,6 +7,14 @@ Changes
 ----------------
 
 
+------------------
+1.2.1 (2010-01-20)
+------------------
+
+- Bug fix: the generation added in 1.2 did not properly clean up
+  expired tokens, and could leave the token utility in an inconsistent
+  state.
+
 
 ----------------
 1.2 (2009-11-23)

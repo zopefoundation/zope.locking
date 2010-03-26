@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="zope.locking",
     version="1.3dev",
+    license='ZPL 2.1',
     packages=find_packages('src'),
     package_dir={'':'src'},
     namespace_packages=['zope'],

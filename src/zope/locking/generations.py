@@ -1,9 +1,9 @@
 import BTrees.OOBTree
-import zope.interface
 import zope.app.generations.interfaces
-
+import zope.interface
 import zope.locking.interfaces
 import zope.locking.utils
+
 
 class SchemaManager(object):
 
@@ -17,19 +17,13 @@ class SchemaManager(object):
         # Clean up cruft in any existing token utilities.
         # This is done here because zope.locking didn't have a
         # schema manager prior to 1.2.
-        app = context.connection.root().get('Application')
-        if app is not None:
-            for util in find_token_utilities(app):
-                fix_token_utility(util)
+        clean_locks(context)
 
     def evolve(self, context, generation):
         if generation == 2:
             # Going from generation 1 -> 2, we need to run the token
             # utility fixer again because of a deficiency it had in 1.2.
-            app = context.connection.root().get('Application')
-            if app is not None:
-                for util in find_token_utilities(app):
-                    fix_token_utility(util)
+            clean_locks(context)
 
 
 schemaManager = SchemaManager()
@@ -41,6 +35,14 @@ def get_site_managers(app_root):
             for _sm in _get_site_managers(sm):
                 yield _sm
     return _get_site_managers(app_root.getSiteManager())
+
+
+def clean_locks(context):
+    """Clean out old locks from token utilities."""
+    app = context.connection.root().get('Application')
+    if app is not None:
+        for util in find_token_utilities(app):
+            fix_token_utility(util)
 
 
 def find_token_utilities(app_root):

@@ -36,4 +36,5 @@ setup(
         open("src/zope/locking/README.txt").read()),
     author='Zope Project',
     author_email='zope3-dev@zope.org',
+    url='http://pypi.python.org/pypi/zope.locking',
     )

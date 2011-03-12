@@ -343,8 +343,79 @@ Once a token has ended, the timeout can no longer be changed.
     ...
     EndedError
 
+A token cannot be registered with multiple utilities.
+
+    >>> util2 = zope.locking.utility.TokenUtility()
+    >>> conn.add(util2)
+    >>> token = tokens.EndableFreeze(demo)
+    >>> _ = util.register(token)
+    >>> _ = util2.register(token)
+    Traceback (most recent call last):
+    ...
+    ValueError: Lock is already registered with another utility
+
+    >>> token.utility = util2
+    Traceback (most recent call last):
+    ...
+    ValueError: cannot reset utility
+
+    >>> token.end()
+    >>> token = tokens.Token(demo)
+    >>> token.utility = util2
+    >>> token.utility = util
+    Traceback (most recent call last):
+    ...
+    ValueError: cannot reset utility
+
+
+    >>> token = tokens.SharedLock(demo, ("Henry",))
+    >>> _ = util2.register(token)
+    >>> del events[:]
+    >>> token.remove([])
+    >>> len(events)
+    0
+
+The TokenHandler base class does not implement its `release` method.
+
+    >>> import zope.locking.adapters
+    >>> handler = zope.locking.adapters.TokenHandler(token)
+    >>> handler.release()
+    Traceback (most recent call last):
+    ...
+    NotImplementedError
+
+    >>> token.duration = "" # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ValueError: duration must be datetime.timedelta
+
+    >>> token.remaining_duration = "" # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ValueError: duration must be datetime.timedelta
+
+    >>> token.duration = datetime.timedelta(-1) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ValueError: duration may not be negative
+
+    >>> token.remaining_duration = datetime.timedelta(-1) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ValueError: duration may not be negative
+
+    >>> token.expiration = "" # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ValueError: expiration must be datetime.datetime
+
+    >>> token.expiration = datetime.datetime.utcnow() # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ValueError: expiration must be timezone-aware
+
 We'll undo the hacks, and also end the token (that is no longer ended once
 the hack is finished).
 
-    >>> zope.locking.utils.now = oldNow # undo the hack
     >>> token.end()
+    >>> zope.locking.utils.now = oldNow # undo the hack

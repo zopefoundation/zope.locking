@@ -1,6 +1,7 @@
 import BTrees.OOBTree
 import zope.app.generations.interfaces
 import zope.interface
+import zope.keyreference.interfaces
 import zope.locking.interfaces
 import zope.locking.utils
 
@@ -10,8 +11,8 @@ class SchemaManager(object):
     zope.interface.implements(
         zope.app.generations.interfaces.IInstallableSchemaManager)
 
-    minimum_generation = 2
-    generation = 2
+    minimum_generation = 3
+    generation = 3
 
     def install(self, context):
         # Clean up cruft in any existing token utilities.
@@ -20,7 +21,7 @@ class SchemaManager(object):
         clean_locks(context)
 
     def evolve(self, context, generation):
-        if generation == 2:
+        if generation <= 2:
             # Going from generation 1 -> 2, we need to run the token
             # utility fixer again because of a deficiency it had in 1.2.
             clean_locks(context)
@@ -62,7 +63,9 @@ def fix_token_utility(util):
     for pid in list(util._principal_ids):
         # iterForPrincipalId only returns non-ended locks, so we know
         # they're still good.
-        new_tree = BTrees.OOBTree.OOTreeSet(util.iterForPrincipalId(pid))
+        new_tree = BTrees.OOBTree.OOTreeSet()
+        for token in util.iterForPrincipalId(pid):
+            new_tree.add(zope.keyreference.interfaces.IKeyReference(token))
         if new_tree:
             util._principal_ids[pid] = new_tree
         else:
@@ -70,7 +73,10 @@ def fix_token_utility(util):
     now = zope.locking.utils.now()
     for dt, tree in list(util._expirations.items()):
         if dt > now:
-            util._expirations[dt] = BTrees.OOBTree.OOTreeSet(tree)
+            new_tree = BTrees.OOBTree.OOTreeSet()
+            for token in tree:
+                new_tree.add(zope.keyreference.interfaces.IKeyReference(token))
+            util._expirations[dt] = new_tree
         else:
             del util._expirations[dt]
             for token in tree:

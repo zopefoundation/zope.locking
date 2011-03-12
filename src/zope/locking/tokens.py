@@ -47,9 +47,6 @@ class Token(persistent.Persistent):
                 self._started = utils.now()
         return property(get, set)
 
-    def __cmp__(self, other):
-        return cmp((self._p_jar.db().database_name, self._p_oid),
-            (other._p_jar.db().database_name, other._p_oid))
 
 class EndableToken(Token):
 

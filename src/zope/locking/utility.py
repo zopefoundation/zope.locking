@@ -22,7 +22,7 @@ class TokenUtility(persistent.Persistent, Location):
     def _del(self, tree, token, value):
         """remove a token for a value within either of the two index trees"""
         reg = tree[value]
-        reg.remove(token)
+        reg.remove(IKeyReference(token))
         if not reg:
             del tree[value]
 
@@ -31,18 +31,19 @@ class TokenUtility(persistent.Persistent, Location):
         reg = tree.get(value)
         if reg is None:
             reg = tree[value] = OOTreeSet()
-        reg.insert(token)
+        reg.insert(IKeyReference(token))
 
     def _cleanup(self):
         "clean out expired keys"
         expiredkeys = []
         for k in self._expirations.keys(max=utils.now()):
-            for token in self._expirations[k]:
+            for key_ref in self._expirations[k]:
+                token = key_ref()
                 assert token.ended
                 for p in token.principal_ids:
                     self._del(self._principal_ids, token, p)
                 key_ref = IKeyReference(token.context)
-                del self._locks[key_ref]
+                del self._locks[IKeyReference(token.context)]
             expiredkeys.append(k)
         for k in expiredkeys:
             del self._expirations[k]
@@ -122,7 +123,8 @@ class TokenUtility(persistent.Persistent, Location):
 
     def iterForPrincipalId(self, principal_id):
         locks = self._principal_ids.get(principal_id, ())
-        for l in locks:
+        for key_ref in locks:
+            l = key_ref()
             assert principal_id in frozenset(l.principal_ids)
             if not l.ended:
                 yield l

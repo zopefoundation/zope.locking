@@ -95,9 +95,9 @@ hold a set of the current locks.
 
     >>> sorted(util._principal_ids)
     ['john', 'mary']
-    >>> list(util._principal_ids['john']) == [lock]
+    >>> list(util._principal_ids['john']) == [IKeyReference(lock)]
     True
-    >>> list(util._principal_ids['mary']) == [lock]
+    >>> list(util._principal_ids['mary']) == [IKeyReference(lock)]
     True
 
 And `_expirations` has a single entry: the one hour duration, mapped to a set
@@ -107,7 +107,7 @@ of the one lock.
     1
     >>> iter(util._expirations).next() == lock.expiration
     True
-    >>> list(util._expirations[lock.expiration]) == [lock]
+    >>> list(util._expirations[lock.expiration]) == [IKeyReference(lock)]
     True
 
 Token Modification
@@ -140,7 +140,7 @@ only lock owner.
 
     >>> sorted(util._principal_ids)
     ['susan']
-    >>> list(util._principal_ids['susan']) == [lock]
+    >>> list(util._principal_ids['susan']) == [IKeyReference(lock)]
     True
 
 And `_expirations` has a single entry: the two hour duration, mapped to a set
@@ -150,7 +150,7 @@ of the one lock.
     1
     >>> iter(util._expirations).next() == lock.expiration
     True
-    >>> list(util._expirations[lock.expiration]) == [lock]
+    >>> list(util._expirations[lock.expiration]) == [IKeyReference(lock)]
     True
 
 Adding a Freeze
@@ -180,7 +180,7 @@ The other indexes should not have changed, though.
     ['susan']
     >>> len(util._expirations)
     1
-    >>> list(util._expirations[lock.expiration]) == [lock]
+    >>> list(util._expirations[lock.expiration]) == [IKeyReference(lock)]
     True
 
 Expiration
@@ -217,7 +217,7 @@ However, if we look at the indexes, no changes have been made yet.
     ['susan']
     >>> len(util._expirations)
     1
-    >>> list(util._expirations[lock.expiration]) == [lock]
+    >>> list(util._expirations[lock.expiration]) == [IKeyReference(lock)]
     True
 
 The changes won't be made for the expired lock until we register a new lock.
@@ -236,7 +236,7 @@ Now all the indexes should have removed the references to the old lock.
     ['john']
     >>> len(util._expirations)
     1
-    >>> list(util._expirations[lock.expiration]) == [lock]
+    >>> list(util._expirations[lock.expiration]) == [IKeyReference(lock)]
     True
 
 We just looked at adding a token for one object that removed the index of
@@ -264,7 +264,7 @@ changes will have been made.
     ['john']
     >>> len(util._expirations)
     1
-    >>> list(util._expirations[lock.expiration]) == [lock]
+    >>> list(util._expirations[lock.expiration]) == [IKeyReference(lock)]
     True
 
 Now, when we create a new token for the same object, the indexes are again
@@ -286,7 +286,8 @@ cleared appropriately.
     ['mary']
     >>> len(util._expirations)
     1
-    >>> list(util._expirations[new_lock.expiration]) == [new_lock]
+    >>> list(util._expirations[new_lock.expiration]) == [
+    ...     IKeyReference(new_lock)]
     True
 
 An issue arose when two or more expired locks are stored in the utility. When
@@ -313,7 +314,8 @@ Register the third lock token.
 
     >>> len(util._expirations)
     1
-    >>> list(util._expirations[third_lock.expiration]) == [third_lock]
+    >>> list(util._expirations[third_lock.expiration]) == [
+    ...     IKeyReference(third_lock)]
     True
 
 Explicit Ending

@@ -6,6 +6,16 @@ Changes
 1.3 (unreleased)
 ----------------
 
+- Bug fix: fix an issue with tokens; they are no longer stored as keys
+  in BTrees to avoid ordering issues after conflict resolution.
+  zope.keyreference handles this properly, so use key references
+  instead.
+
+- Bug fix: TokenHandler's _checkInteraction method would raise an
+  incorrect exception when the token was ended.
+
+- 100% test coverage.
+
 
 ------------------
 1.2.2 (2011-01-31)

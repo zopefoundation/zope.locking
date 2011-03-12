@@ -355,6 +355,13 @@ check and modify the remaining_duration attribute.
     >>> ev.old == lock.started + four
     True
 
+    >>> remaining = lock.remaining_duration
+    >>> lock.remaining_duration = None
+    >>> lock.expiration is None
+    True
+
+    >>> lock.remaining_duration = remaining
+
 Now, we'll hack our code to make it think that it's a day later.  It is very
 important to remember that a lock ending with a timeout ends silently--that
 is, no event is fired.
@@ -394,6 +401,11 @@ Make sure to register tokens.  Creating a lock but not registering it puts it
 in a state that is not fully initialized.
 
     >>> lock = tokens.ExclusiveLock(demo, 'john')
+    >>> lock.duration is None
+    True
+
+    >>> lock.duration = datetime.timedelta(1)
+
     >>> lock.started # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
@@ -402,6 +414,40 @@ in a state that is not fully initialized.
     Traceback (most recent call last):
     ...
     UnregisteredError: ...
+
+    >>> lock.expiration # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    UnregisteredError: ...
+
+    >>> lock.remaining_duration # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    UnregisteredError: ...
+
+    >>> t = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
+    >>> lock.expiration = t # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    UnregisteredError: ...
+
+    >>> lock.remaining_duration = datetime.timedelta(1) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    UnregisteredError: ...
+
+    >>> lock = util.register(lock)
+    >>> lock.end()
+    >>> lock.expiration = t # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    EndedError
+
+    >>> lock.remaining_duration = datetime.timedelta(1) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    EndedError
+
 
 ------------
 Shared Locks
@@ -688,6 +734,9 @@ demonstration we are simplifying the registration.
     ...
     ParticipationError
 
+    >>> broker.get() is None
+    True
+
 If we set up an interaction with one participation, the lock will have a
 better chance.
 
@@ -723,9 +772,12 @@ better chance.
     True
     >>> util.get(demo) is token
     True
+    >>> token is broker.get()
+    True
     >>> token.end()
 
 You can only specify principals that are in the current interaction.
+# doctest + ELLIPSIS
 
     >>> token = broker.lock('joe')
     >>> sorted(token.principal_ids)
@@ -741,6 +793,19 @@ The method can take a duration.
     >>> token = broker.lock(duration=two)
     >>> token.duration == two
     True
+
+    >>> token.expiration is not None
+    True
+
+    >>> token.expiration == token.started + token.duration
+    True
+
+The duration can be set to `None`.
+
+    >>> token.duration = None
+    >>> token.expiration is None
+    True
+
     >>> token.end()
 
 If the interaction has more than one principal, a principal (in the
@@ -962,6 +1027,22 @@ is in an interaction with only the lock owner.
     ParticipationError: ...
     >>> lock.end()
 
+Attempting to modify a token that has ended results in an EndedError
+being raised.
+
+    >>> handler.expiration = handler.started + three
+    Traceback (most recent call last):
+    ...
+    EndedError
+    >>> handler.duration = remaining_duration = two
+    Traceback (most recent call last):
+    ...
+    EndedError
+    >>> handler.release()
+    Traceback (most recent call last):
+    ...
+    EndedError
+
 SharedLockHandlers
 ------------------
 
@@ -1010,6 +1091,11 @@ represented as they want. Other policies could be written in other adapters.
     ...
     ParticipationError: ...
 
+    >>> handler.release(("joe",)) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    ParticipationError: ...
+
 The shared lock handler adds two additional methods to a standard handler:
 `join` and `add`.  They do similar jobs, but are separate to allow separate
 security settings for each.  The `join` method lets some or all of the
@@ -1034,8 +1120,35 @@ principals in the current interaction must be a part of the lock.
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> lock.end()
+    >>> handler.join()
+    >>> sorted(handler.principal_ids)
+    ['joe', 'mary', 'susan']
+
+    >>> handler.release()
+    >>> sorted(handler.principal_ids)
+    ['mary', 'susan']
+
+    >>> handler.join()
+    >>> handler.release(('mary', 'susan',))
+    Traceback (most recent call last):
+    ...
+    ValueError: mary
+
+    >>> handler.release(('joe',))
+    >>> sorted(handler.principal_ids)
+    ['mary', 'susan']
+
     >>> zope.security.management.endInteraction()
+
+Calling `join` without an interaction results in a ValueError being
+raised.
+
+    >>> handler.join()
+    Traceback (most recent call last):
+    ...
+    ValueError
+
+    >>> lock.end()
 
 --------
 Warnings

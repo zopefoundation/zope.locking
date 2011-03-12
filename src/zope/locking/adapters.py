@@ -71,7 +71,7 @@ class TokenHandler(object):
 
     def _checkInteraction(self):
         if self.token.ended is not None:
-            raise interfaces.ExpirationChangedEvent
+            raise interfaces.EndedError
         interaction_principals = getInteractionPrincipals()
         token_principals = frozenset(self.token.principal_ids)
         if interaction_principals is not None:

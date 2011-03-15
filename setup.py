@@ -28,6 +28,9 @@ setup(
         'zope.security',
         'zope.testing',
         ],
+    extras_require=dict(
+       test=["zope.site"],
+        ),
     zip_safe = False,
     description=open("README.txt").read(),
     long_description=(

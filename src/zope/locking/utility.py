@@ -1,5 +1,6 @@
 import persistent
 import persistent.interfaces
+import ZODB.interfaces
 
 from BTrees.OOBTree import OOBTree, OOTreeSet
 from zope import interface, component, event
@@ -54,8 +55,10 @@ class TokenUtility(persistent.Persistent, Location):
             token.utility = self
         elif token.utility is not self:
             raise ValueError('Lock is already registered with another utility')
-        if persistent.interfaces.IPersistent.providedBy(token):
-            self._p_jar.add(token)
+        if (persistent.interfaces.IPersistent.providedBy(token) and
+            not getattr(token, "_p_jar", None)):
+            conn = ZODB.interfaces.IConnection(self)
+            conn.add(token)
         key_ref = IKeyReference(token.context)
         current = self._locks.get(key_ref)
         if current is not None:

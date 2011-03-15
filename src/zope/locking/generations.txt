@@ -1,0 +1,171 @@
+===========
+Generations
+===========
+
+The format of the internal data structures the token utility uses has
+changed a few times in 1.2.x due to bugs and other issues;
+therefore the zope.locking package includes a zope.generations schema
+manager to evolve the old data structures.
+
+Note that the schema manager is optional, and can be excluded by
+excluding `generations.zcml`.  Token utilities can be evolved manually
+using the helper functions in zope.locking.generations that are
+tested below.
+
+IMPORTANT: If the token utility is not registered in any site manager,
+it will also need to be evolved manually.
+
+Set Up
+------
+
+    >>> import datetime
+    >>> import random
+    >>> import zope.keyreference.interfaces
+    >>> import zope.location.traversing
+    >>> import zope.locking.generations
+    >>> import zope.locking.tokens
+    >>> import zope.locking.utils
+    >>> import zope.locking.utility
+    >>> import zope.site.folder
+    >>> import zope.site.hooks
+    >>> import zope.site.testing
+
+    >>> import BTrees.check
+    >>> import BTrees.OOBTree
+
+    >>> root = conn.root()
+    >>> gsm = zope.component.getGlobalSiteManager()
+    >>> gsm.registerAdapter(
+    ...     zope.location.traversing.LocationPhysicallyLocatable)
+
+To test the `get_site_managers` function used by the schema manager,
+we add a host of sites to the database.
+
+    >>> app = root["Application"] = zope.site.folder.rootFolder()
+    >>> root._p_jar.add(app)
+
+    >>> sms = []
+    >>> sms.append(zope.site.testing.createSiteManager(app))
+    >>> zope.site.hooks.setSite(app)
+    >>> app["site1"] = zope.site.folder.Folder()
+    >>> sms.append(zope.site.testing.createSiteManager(app["site1"]))
+    >>> app["site1a"] = zope.site.folder.Folder()
+    >>> sms.append(zope.site.testing.createSiteManager(app["site1a"]))
+    >>> app["site2"] = zope.site.folder.Folder()
+    >>> sms.append(zope.site.testing.createSiteManager(app["site2"]))
+
+`get_site_managers` returns all of the site managers for the sites we
+created.
+
+    >>> sms == list(zope.locking.generations.get_site_managers(app))
+    True
+
+    >>> app["site3"] = zope.site.folder.Folder()
+    >>> sms.append(zope.site.testing.createSiteManager(app["site3"]))
+
+    >>> sms == list(zope.locking.generations.get_site_managers(app))
+    True
+
+The `find_token_utilities` function returns all of the token utilities
+from all of the sites.
+
+    >>> list(zope.locking.generations.find_token_utilities(app))
+    []
+
+
+    >>> iface = zope.locking.interfaces.ITokenUtility
+    >>> sm = app["site1a"].getSiteManager()
+    >>> util = zope.locking.utility.TokenUtility()
+    >>> util2 = zope.locking.utility.TokenUtility()
+    >>> zope.site.testing.addUtility(sm, "", iface, util) and None
+    >>> zope.site.testing.addUtility(sm, "named", iface, util2) and None
+    >>> utils = list(zope.locking.generations.find_token_utilities(app))
+    >>> utils == [util, util2]
+    True
+
+    >>> sm = app["site3"].getSiteManager()
+    >>> util3 = zope.locking.utility.TokenUtility()
+    >>> zope.site.testing.addUtility(sm, "", iface, util3) and None
+    >>> utils = list(zope.locking.generations.find_token_utilities(app))
+    >>> utils == [util, util2, util3]
+    True
+
+    >>> app["util"] = zope.locking.utility.TokenUtility()
+
+app["util"] isn't registered in any site manager, so it isn't found.
+
+    >>> app["util"] in list(
+    ...     zope.locking.generations.find_token_utilities(app))
+    False
+
+The `fix_token_utility` function converts legacy utilities to the new
+format.  We'll add tokens to the utilities to emulate the legacy
+behavior of storing Tokens directly as keys in TreeSets (bad idea). 
+
+    >>> principals = ("henry", "mario", "edwige",)
+    >>> now = zope.locking.utils.now()
+    >>> def add_bad_tokens(util):
+    ...     _now = zope.locking.utils.now()
+    ...     for i in range(10):
+    ...         obj = Demo()
+    ...         pid = random.choice(principals)
+    ...         token = zope.locking.tokens.ExclusiveLock(obj, pid)
+    ...         if pid not in util._principal_ids:
+    ...             util._principal_ids[pid] = BTrees.OOBTree.TreeSet()
+    ...         util._principal_ids[pid].insert(token)
+    ...         key = zope.keyreference.interfaces.IKeyReference(obj)
+    ...         expiration = _now + datetime.timedelta(minutes=i+1)
+    ...         util._locks[key] = (token, frozenset([pid]), expiration)
+    ...         token.utility = util
+    ...         token.expiration = expiration
+    ...         if expiration not in util._expirations:
+    ...             util._expirations[expiration] = BTrees.OOBTree.TreeSet()
+    ...         util._expirations[expiration].insert(token)
+    ...         util._principal_ids["louis"] = BTrees.OOBTree.TreeSet()
+
+    >>> add_bad_tokens(util)
+
+    >>> now = zope.locking.utils.now()
+
+Let's travel 5 minutes into the future, and call the fixer; it will only
+leave non-expired tokens in the utility.
+
+    >>> zope.locking.utils.set_now(now + datetime.timedelta(minutes=5))
+    >>> zope.locking.generations.fix_token_utility(util)
+    >>> len(util._locks)
+    5
+
+    >>> "louis" in util._principal_ids
+    False
+
+    >>> def check_util(util):
+    ...     for tree in util._principal_ids.values():
+    ...         BTrees.check.check(tree)
+    ...         for keyref in tree:
+    ...             if not (
+    ...         zope.keyreference.interfaces.IKeyReference.providedBy(keyref)):
+    ...                 raise Exception(
+    ...                     "Expected keyreference, got: %r" % (keyref,))
+
+    >>> check_util(util)
+
+    >>> util.__init__() # reset
+
+    >>> add_bad_tokens(util2)
+    >>> add_bad_tokens(util3)
+    >>> check_util(util2)
+    Traceback (most recent call last):
+    ...
+    Exception: Expected keyreference, got: ...
+
+The `clean_locks` function is used by the schema manager to find all
+token utilities and run `fix_token_utility` on them.
+
+    >>> class Context(object):
+    ...     pass
+
+    >>> context = Context()
+    >>> context.connection = conn
+    >>> zope.locking.generations.clean_locks(context)
+    >>> for util in (util2, util3):
+    ...     check_util(util)

@@ -87,13 +87,9 @@ Next we'll change the duration attribute.
 Now we'll hack our code to make it think that it is two hours later, and then
 check and modify the remaining_duration attribute.
 
-    >>> def hackNow():
-    ...     return (datetime.datetime.now(pytz.utc) +
-    ...             datetime.timedelta(hours=2))
-    ...
     >>> import zope.locking.utils
-    >>> oldNow = zope.locking.utils.now
-    >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
+    >>> now = zope.locking.utils.now()
+    >>> zope.locking.utils.set_now(now + datetime.timedelta(hours=2))
     >>> lock.duration
     datetime.timedelta(0, 14400)
     >>> two >= lock.remaining_duration >= one
@@ -119,7 +115,7 @@ is, no event is fired.
     ...     return (
     ...         datetime.datetime.now(pytz.utc) + datetime.timedelta(days=1))
     ...
-    >>> zope.locking.utils.now = hackNow # make code think it is a day later
+    >>> zope.locking.utils.set_now(now + datetime.timedelta(days=1))
     >>> lock.ended >= lock.started
     True
     >>> util.get(demo) is None
@@ -147,7 +143,7 @@ Once a lock has ended, the timeout can no longer be changed.
 We'll undo the hacks, and also end the lock (that is no longer ended once
 the hack is finished).
 
-    >>> zope.locking.utils.now = oldNow # undo the hack
+    >>> zope.locking.utils.reset()
     >>> lock.end()
 
 --------------
@@ -209,17 +205,14 @@ As part of that knowledge, it disallows another lock or freeze on the same
 object.
 
     >>> util.register(tokens.ExclusiveLock(demo, 'mary'))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
     >>> util.register(tokens.SharedLock(demo, ('mary', 'jane')))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
     >>> util.register(tokens.EndableFreeze(demo))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
@@ -384,32 +377,32 @@ The TokenHandler base class does not implement its `release` method.
     ...
     NotImplementedError
 
-    >>> token.duration = "" # doctest: +ELLIPSIS
+    >>> token.duration = ""
     Traceback (most recent call last):
     ...
     ValueError: duration must be datetime.timedelta
 
-    >>> token.remaining_duration = "" # doctest: +ELLIPSIS
+    >>> token.remaining_duration = ""
     Traceback (most recent call last):
     ...
     ValueError: duration must be datetime.timedelta
 
-    >>> token.duration = datetime.timedelta(-1) # doctest: +ELLIPSIS
+    >>> token.duration = datetime.timedelta(-1)
     Traceback (most recent call last):
     ...
     ValueError: duration may not be negative
 
-    >>> token.remaining_duration = datetime.timedelta(-1) # doctest: +ELLIPSIS
+    >>> token.remaining_duration = datetime.timedelta(-1)
     Traceback (most recent call last):
     ...
     ValueError: duration may not be negative
 
-    >>> token.expiration = "" # doctest: +ELLIPSIS
+    >>> token.expiration = ""
     Traceback (most recent call last):
     ...
     ValueError: expiration must be datetime.datetime
 
-    >>> token.expiration = datetime.datetime.utcnow() # doctest: +ELLIPSIS
+    >>> token.expiration = datetime.datetime.utcnow()
     Traceback (most recent call last):
     ...
     ValueError: expiration must be timezone-aware

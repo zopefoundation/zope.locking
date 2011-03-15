@@ -61,11 +61,10 @@ def fix_token_utility(util):
         utility due to this issue.
     """
     for pid in list(util._principal_ids):
-        # iterForPrincipalId only returns non-ended locks, so we know
-        # they're still good.
         new_tree = BTrees.OOBTree.OOTreeSet()
-        for token in util.iterForPrincipalId(pid):
-            new_tree.add(zope.keyreference.interfaces.IKeyReference(token))
+        for token in util._principal_ids[pid]:
+            if not token.ended:
+                new_tree.add(zope.keyreference.interfaces.IKeyReference(token))
         if new_tree:
             util._principal_ids[pid] = new_tree
         else:

@@ -49,7 +49,7 @@ connection to the database before it can register persistent tokens.
     >>> util.register(lock)
     Traceback (most recent call last):
     ...
-    AttributeError: 'NoneType' object has no attribute 'add'
+    TypeError: ...
 
     >>> conn.add(util)
 
@@ -151,17 +151,15 @@ The token utility disallows registration of multiple active tokens for the
 same object.
 
     >>> util.register(tokens.ExclusiveLock(demo, 'mary'))
-    ... # doctest: +ELLIPSIS
+    ...
     Traceback (most recent call last):
     ...
     RegistrationError: ...
     >>> util.register(tokens.SharedLock(demo, ('mary', 'jane')))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
     >>> util.register(tokens.Freeze(demo))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
@@ -331,13 +329,9 @@ Next we'll change the duration attribute.
 Now we'll hack our code to make it think that it is two hours later, and then
 check and modify the remaining_duration attribute.
 
-    >>> def hackNow():
-    ...     return (datetime.datetime.now(pytz.utc) +
-    ...             datetime.timedelta(hours=2))
-    ...
     >>> import zope.locking.utils
-    >>> oldNow = zope.locking.utils.now
-    >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
+    >>> now = zope.locking.utils.now()
+    >>> zope.locking.utils.set_now(now + datetime.timedelta(hours=2))
     >>> lock.duration
     datetime.timedelta(0, 14400)
     >>> two >= lock.remaining_duration >= one
@@ -366,11 +360,7 @@ Now, we'll hack our code to make it think that it's a day later.  It is very
 important to remember that a lock ending with a timeout ends silently--that
 is, no event is fired.
 
-    >>> def hackNow():
-    ...     return (
-    ...         datetime.datetime.now(pytz.utc) + datetime.timedelta(days=1))
-    ...
-    >>> zope.locking.utils.now = hackNow # make code think it is a day later
+    >>> zope.locking.utils.set_now(now + datetime.timedelta(days=1))
     >>> lock.ended == lock.expiration
     True
     >>> util.get(demo) is None
@@ -394,7 +384,7 @@ Once a lock has ended, the timeout can no longer be changed.
 We'll undo the hacks, and also end the lock (that is no longer ended once
 the hack is finished).
 
-    >>> zope.locking.utils.now = oldNow # undo the hack
+    >>> zope.locking.utils.reset()
     >>> lock.end()
 
 Make sure to register tokens.  Creating a lock but not registering it puts it
@@ -406,44 +396,44 @@ in a state that is not fully initialized.
 
     >>> lock.duration = datetime.timedelta(1)
 
-    >>> lock.started # doctest: +ELLIPSIS
+    >>> lock.started
     Traceback (most recent call last):
     ...
     UnregisteredError: ...
-    >>> lock.ended # doctest: +ELLIPSIS
-    Traceback (most recent call last):
-    ...
-    UnregisteredError: ...
-
-    >>> lock.expiration # doctest: +ELLIPSIS
+    >>> lock.ended
     Traceback (most recent call last):
     ...
     UnregisteredError: ...
 
-    >>> lock.remaining_duration # doctest: +ELLIPSIS
+    >>> lock.expiration
+    Traceback (most recent call last):
+    ...
+    UnregisteredError: ...
+
+    >>> lock.remaining_duration
     Traceback (most recent call last):
     ...
     UnregisteredError: ...
 
     >>> t = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
-    >>> lock.expiration = t # doctest: +ELLIPSIS
+    >>> lock.expiration = t
     Traceback (most recent call last):
     ...
     UnregisteredError: ...
 
-    >>> lock.remaining_duration = datetime.timedelta(1) # doctest: +ELLIPSIS
+    >>> lock.remaining_duration = datetime.timedelta(1)
     Traceback (most recent call last):
     ...
     UnregisteredError: ...
 
     >>> lock = util.register(lock)
     >>> lock.end()
-    >>> lock.expiration = t # doctest: +ELLIPSIS
+    >>> lock.expiration = t
     Traceback (most recent call last):
     ...
     EndedError
 
-    >>> lock.remaining_duration = datetime.timedelta(1) # doctest: +ELLIPSIS
+    >>> lock.remaining_duration = datetime.timedelta(1)
     Traceback (most recent call last):
     ...
     EndedError
@@ -585,17 +575,14 @@ tokens.  Here's a quick summary in code.
     >>> list(util) == [lock]
     True
     >>> util.register(tokens.ExclusiveLock(demo, 'mary'))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
     >>> util.register(tokens.SharedLock(demo, ('mary', 'jane')))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
     >>> util.register(tokens.Freeze(demo))
-    ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     RegistrationError: ...
@@ -777,7 +764,6 @@ better chance.
     >>> token.end()
 
 You can only specify principals that are in the current interaction.
-# doctest + ELLIPSIS
 
     >>> token = broker.lock('joe')
     >>> sorted(token.principal_ids)
@@ -1009,19 +995,19 @@ is in an interaction with only the lock owner.
     True
     >>> lock = util.register(tokens.ExclusiveLock(demo, 'mary'))
     >>> handler = interfaces.ITokenHandler(lock) # for joe's interaction still
-    >>> handler.duration = two # doctest: +ELLIPSIS
+    >>> handler.duration = two
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> handler.expiration = handler.started + three # doctest: +ELLIPSIS
+    >>> handler.expiration = handler.started + three
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> handler.remaining_duration = two # doctest: +ELLIPSIS
+    >>> handler.remaining_duration = two
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> handler.release() # doctest: +ELLIPSIS
+    >>> handler.release()
     Traceback (most recent call last):
     ...
     ParticipationError: ...
@@ -1074,24 +1060,24 @@ represented as they want. Other policies could be written in other adapters.
     >>> handler.release()
     >>> sorted(handler.principal_ids)
     ['mary']
-    >>> handler.duration = two # doctest: +ELLIPSIS
+    >>> handler.duration = two
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> handler.expiration = handler.started + three # doctest: +ELLIPSIS
+    >>> handler.expiration = handler.started + three
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> handler.remaining_duration = two # doctest: +ELLIPSIS
+    >>> handler.remaining_duration = two
     Traceback (most recent call last):
     ...
     ParticipationError: ...
-    >>> handler.release() # doctest: +ELLIPSIS
+    >>> handler.release()
     Traceback (most recent call last):
     ...
     ParticipationError: ...
 
-    >>> handler.release(("joe",)) # doctest: +ELLIPSIS
+    >>> handler.release(("joe",))
     Traceback (most recent call last):
     ...
     ParticipationError: ...
@@ -1116,7 +1102,7 @@ principals in the current interaction must be a part of the lock.
     >>> sorted(handler.principal_ids)
     ['joe', 'mary', 'susan']
     >>> handler.release()
-    >>> handler.add('jake') # doctest: +ELLIPSIS
+    >>> handler.add('jake')
     Traceback (most recent call last):
     ...
     ParticipationError: ...

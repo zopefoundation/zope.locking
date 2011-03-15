@@ -11,11 +11,13 @@ import zope.component
 import zope.event
 
 import zope.locking.testing
+import zope.site.testing
 
 from zope.testing import doctest
 
 
 def setUp(test):
+    zope.site.testing.siteSetUp()
     zope.app.testing.placelesssetup.setUp(test)
     db = test.globs['db'] = ZODB.DB(ZODB.MappingStorage.MappingStorage())
     test.globs['conn'] = db.open()
@@ -25,10 +27,14 @@ def setUp(test):
         zope.app.keyreference.persistent.KeyReferenceToPersistent,
         [persistent.interfaces.IPersistent],
         zope.app.keyreference.interfaces.IKeyReference)
+    zope.component.provideAdapter(
+        zope.app.keyreference.persistent.connectionOfPersistent,
+        [persistent.interfaces.IPersistent])
     events = test.globs['events'] = []
     zope.event.subscribers.append(events.append)
 
 def tearDown(test):
+    zope.site.testing.siteTearDown()
     zope.app.testing.placelesssetup.tearDown(test)
     transaction.abort()
     test.globs['conn'].close()
@@ -38,17 +44,16 @@ def tearDown(test):
     del events[:] # being paranoid
 
 def test_suite():
-    return unittest.TestSuite((
+    optionflags = doctest.ELLIPSIS
+    return unittest.TestSuite(
         doctest.DocFileSuite(
             'README.txt',
-            setUp=setUp, tearDown=tearDown),
-        doctest.DocFileSuite(
             'annoying.txt',
-            setUp=setUp, tearDown=tearDown),
-        doctest.DocFileSuite(
             'cleanup.txt',
+            'generations.txt',
+            optionflags=optionflags,
             setUp=setUp, tearDown=tearDown),
-        ))
+       )
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

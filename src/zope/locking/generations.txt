@@ -80,14 +80,14 @@ from all of the sites.
     >>> zope.site.testing.addUtility(sm, "", iface, util) and None
     >>> zope.site.testing.addUtility(sm, "named", iface, util2) and None
     >>> utils = list(zope.locking.generations.find_token_utilities(app))
-    >>> utils == [util, util2]
+    >>> sorted(utils) == sorted([util, util2])
     True
 
     >>> sm = app["site3"].getSiteManager()
     >>> util3 = zope.locking.utility.TokenUtility()
     >>> zope.site.testing.addUtility(sm, "", iface, util3) and None
     >>> utils = list(zope.locking.generations.find_token_utilities(app))
-    >>> utils == [util, util2, util3]
+    >>> sorted(utils) == sorted([util, util2, util3])
     True
 
     >>> app["util"] = zope.locking.utility.TokenUtility()

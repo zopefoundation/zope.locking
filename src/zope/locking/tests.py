@@ -1,4 +1,5 @@
 import unittest
+import doctest
 
 import persistent.interfaces
 import ZODB.DB
@@ -12,7 +13,6 @@ import zope.event
 
 import zope.locking.testing
 
-from zope.testing import doctest
 
 
 def setUp(test):

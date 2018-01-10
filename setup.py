@@ -1,5 +1,10 @@
 from setuptools import setup, find_packages
 
+tests_require=[
+    'zope.app.appsetup',
+    'transaction',
+    ]
+
 setup(
     name="zope.locking",
     version="1.3dev",
@@ -9,26 +14,22 @@ setup(
     namespace_packages=['zope'],
     include_package_data=True,
     install_requires = [
-        'setuptools',
-        'ZODB3',
+        'BTrees',
+        'persistent',
         'pytz',
-        'zc.i18n',
-        'zope.app.generations',
-        'zope.app.keyreference',
-        'zope.app.publisher',
-        'zope.app.testing',
+        'setuptools',
         'zope.component',
         'zope.event',
-        'zope.formlib',
-        'zope.i18nmessageid',
+        'zope.generations',
         'zope.interface',
+        'zope.keyreference',
         'zope.location',
-        'zope.publisher',
         'zope.schema',
         'zope.security',
-        'zope.testing',
         ],
     zip_safe = False,
+    tests_require=tests_require,
+    extras_require={'test': tests_require},
     description=open("README.txt").read(),
     long_description=(
         open('src/zope/locking/CHANGES.txt').read() +

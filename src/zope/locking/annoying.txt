@@ -11,11 +11,13 @@ This is some setup that the tests need.
 
     >>> from zope import interface, component
 
+    >>> conn = get_connection()
     >>> conn.add(util)
 
     >>> import datetime
     >>> import pytz
     >>> before_creation = datetime.datetime.now(pytz.utc)
+    >>> from zope.locking.testing import Demo
     >>> demo = Demo()
 
 ----------------------------------
@@ -61,6 +63,7 @@ fire events.  First we'll change the expiration attribute.
     True
     >>> lock.duration == one
     True
+    >>> from zope.component.eventtesting import events
     >>> ev = events[-1]
     >>> verifyObject(interfaces.IExpirationChangedEvent, ev)
     True

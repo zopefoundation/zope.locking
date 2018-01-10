@@ -1,6 +1,8 @@
 import zope.component
 import zope.interface
-import zope.app.keyreference.interfaces
+import zope.keyreference.interfaces
+import zope.app.appsetup.testlayer
+import zope.locking
 
 class IDemo(zope.interface.Interface):
     """a demonstration interface for a demonstration class"""
@@ -9,7 +11,7 @@ class Demo(object):
     zope.interface.implements(IDemo)
 
 class DemoKeyReference(object):
-    zope.interface.implements(zope.app.keyreference.interfaces.IKeyReference)
+    zope.interface.implements(zope.keyreference.interfaces.IKeyReference)
     zope.component.adapts(IDemo)
 
     _class_counter = 0
@@ -35,3 +37,5 @@ class DemoKeyReference(object):
             return cmp(self._id, other._id)
         return cmp(self.key_type_id, other.key_type_id)
 
+
+layer = zope.app.appsetup.testlayer.ZODBLayer(zope.locking)

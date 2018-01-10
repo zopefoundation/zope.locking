@@ -1,0 +1,12 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope">
+  <include package="zope.component" file="meta.zcml" />
+  <include package="zope.locking" />
+
+  <adapter factory="zope.locking.testing.DemoKeyReference"/>
+  <adapter
+    factory="zope.keyreference.persistent.KeyReferenceToPersistent"
+    for="persistent.interfaces.IPersistent"
+    provides="zope.keyreference.interfaces.IKeyReference"/>
+
+</configure>

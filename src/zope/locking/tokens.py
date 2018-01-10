@@ -2,10 +2,9 @@ import persistent
 import datetime
 from BTrees.OOBTree import OOBTree
 
-from zope import interface, component, event
+from zope import interface, event
 
 from zope.locking import interfaces, utils
-from zope.locking.i18n import _
 
 NO_DURATION = datetime.timedelta()
 

@@ -19,7 +19,6 @@ $Id: $
 from zope import interface, schema
 
 from zope.component.interfaces import IObjectEvent, ObjectEvent
-from zope.locking.i18n import _
 
 ##############################################################################
 # Token utility
@@ -84,7 +83,7 @@ class IAbstractToken(interface.Interface):
         an iterable with no members.  Readonly.""")
 
     started = schema.Datetime(
-        description=_("""the date and time, with utc timezone, that the token
+        description=(u"""the date and time, with utc timezone, that the token
         was registered with the token utility and became effective.  Required
         after the token has been registered."""),
         required=False, readonly=True)
@@ -97,29 +96,29 @@ class IEndable(interface.Interface):
     """
 
     ended = schema.Datetime(
-        description=_("""the date and time, with utc timezone, that the token
+        description=(u"""the date and time, with utc timezone, that the token
         ended, explicitly or from expiration."""),
         required=False, readonly=True)
 
     expiration = schema.Datetime(
-        description=_(
-            """the expiration time, with utc timezone.
+        description=(
+            u"""the expiration time, with utc timezone.
             None indicates no expiration.
             Readonly (but see extending interfaces).
             """),
         required=False)
 
     duration = schema.Timedelta(
-        description=_(
-            """the duration of the token timeout from its start.
+        description=(
+            u"""the duration of the token timeout from its start.
             None indicates no expiration.
             Readonly (but see extending interfaces).
             """),
         required=False)
 
     remaining_duration = schema.Timedelta(
-        description=_(
-            """the remaining effective duration for the token from "now".
+        description=(
+            u"""the remaining effective duration for the token from "now".
             None indicates no expiration.  If the token has ended, return
             a datetime.timedelta of no time.
             Readonly (but see extending interfaces).
@@ -160,8 +159,8 @@ class IEndableToken(IToken, IEndable):
     """A standard endable token."""
 
     expiration = schema.Datetime(
-        description=_(
-            """the expiration time, with utc timezone.
+        description=(
+            u"""the expiration time, with utc timezone.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             Otherwise call utility.register, fire ExpirationChangedEvent.
@@ -169,8 +168,8 @@ class IEndableToken(IToken, IEndable):
         required=False)
 
     duration = schema.Timedelta(
-        description=_(
-            """the duration of the token timeout from its start.
+        description=(
+            u"""the duration of the token timeout from its start.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             Otherwise call utility.register, fire ExpirationChangedEvent.
@@ -178,8 +177,8 @@ class IEndableToken(IToken, IEndable):
         required=False)
 
     remaining_duration = schema.Timedelta(
-        description=_(
-            """the remaining effective duration for the token from "now".
+        description=(
+            u"""the remaining effective duration for the token from "now".
             None indicates no expiration.  If the token has ended, return
             a datetime.timedelta of no time.
             When setting, if token has ended then raise EndedError.
@@ -292,8 +291,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         data storage""")
 
     expiration = schema.Datetime(
-        description=_(
-            """the expiration time, with utc timezone.
+        description=(
+            u"""the expiration time, with utc timezone.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             If all of the principals in the current interaction are not owners
@@ -303,8 +302,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         required=False)
 
     duration = schema.Timedelta(
-        description=_(
-            """the duration of the token timeout from its start.
+        description=(
+            u"""the duration of the token timeout from its start.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             If all of the principals in the current interaction are not owners
@@ -314,8 +313,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         required=False)
 
     remaining_duration = schema.Timedelta(
-        description=_(
-            """the remaining effective duration for the token from "now".
+        description=(
+            u"""the remaining effective duration for the token from "now".
             None indicates no expiration.  If the token has ended, return
             a datetime.timedelta of no time.
             When setting, if token has ended then raise EndedError.

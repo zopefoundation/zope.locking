@@ -1,5 +1,5 @@
 import BTrees.OOBTree
-import zope.app.generations.interfaces
+import zope.generations.interfaces
 import zope.interface
 import zope.locking.interfaces
 import zope.locking.utils
@@ -8,7 +8,7 @@ import zope.locking.utils
 class SchemaManager(object):
 
     zope.interface.implements(
-        zope.app.generations.interfaces.IInstallableSchemaManager)
+        zope.generations.interfaces.IInstallableSchemaManager)
 
     minimum_generation = 2
     generation = 2

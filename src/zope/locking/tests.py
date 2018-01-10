@@ -1,54 +1,36 @@
 import unittest
 import doctest
-
-import persistent.interfaces
-import ZODB.DB
-import ZODB.MappingStorage
-import transaction
-import zope.app.keyreference.interfaces
-import zope.app.keyreference.persistent
-import zope.app.testing.placelesssetup
-import zope.component
-import zope.event
-
 import zope.locking.testing
 
-
-
-def setUp(test):
-    zope.app.testing.placelesssetup.setUp(test)
-    db = test.globs['db'] = ZODB.DB(ZODB.MappingStorage.MappingStorage())
-    test.globs['conn'] = db.open()
-    test.globs['Demo'] = zope.locking.testing.Demo
-    zope.component.provideAdapter(zope.locking.testing.DemoKeyReference)
-    zope.component.provideAdapter(
-        zope.app.keyreference.persistent.KeyReferenceToPersistent,
-        [persistent.interfaces.IPersistent],
-        zope.app.keyreference.interfaces.IKeyReference)
-    events = test.globs['events'] = []
-    zope.event.subscribers.append(events.append)
-
-def tearDown(test):
-    zope.app.testing.placelesssetup.tearDown(test)
-    transaction.abort()
-    test.globs['conn'].close()
-    test.globs['db'].close()
-    events = test.globs.pop('events')
-    assert zope.event.subscribers.pop().__self__ is events
-    del events[:] # being paranoid
-
 def test_suite():
-    return unittest.TestSuite((
+
+    layer = zope.locking.testing.layer
+
+    def get_connection():
+        return layer.db.open()
+
+    def get_db():
+        return layer.db
+
+    suite = unittest.TestSuite((
         doctest.DocFileSuite(
             'README.txt',
-            setUp=setUp, tearDown=tearDown),
+            globs=dict(
+                get_connection=get_connection,
+                get_db=get_db
+            )),
         doctest.DocFileSuite(
             'annoying.txt',
-            setUp=setUp, tearDown=tearDown),
+            globs=dict(
+                get_connection=get_connection,
+                get_db=get_db
+            )),
         doctest.DocFileSuite(
             'cleanup.txt',
-            setUp=setUp, tearDown=tearDown),
+            globs=dict(
+                get_connection=get_connection,
+                get_db=get_db
+            )),
         ))
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    suite.layer = layer
+    return suite

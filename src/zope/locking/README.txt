@@ -45,12 +45,14 @@ persistent, and the included implementation is in fact persistent.Persistent,
 and expects to be installed as a local utility.  The utility needs a
 connection to the database before it can register persistent tokens.
 
+    >>> from zope.locking.testing import Demo
     >>> lock = tokens.ExclusiveLock(Demo(), 'Fantomas')
     >>> util.register(lock)
     Traceback (most recent call last):
     ...
     AttributeError: 'NoneType' object has no attribute 'add'
 
+    >>> conn = get_connection()
     >>> conn.add(util)
 
 If the token provides IPersistent, the utility will add it to its connection.
@@ -112,6 +114,7 @@ This is simply a list whose `append` method has been added as a subscriber
 to the zope.event.subscribers list.  It's included as a global when this file
 is run as a test.)
 
+    >>> from zope.component.eventtesting import events
     >>> ev = events[-1]
     >>> verifyObject(interfaces.ITokenStartedEvent, ev)
     True

@@ -1,12 +1,27 @@
-import persistent
+#############################################################################
+#
+# Copyright (c) 2018 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+
 import datetime
+import persistent
+
 from BTrees.OOBTree import OOBTree
-
 from zope import interface, event
-
 from zope.locking import interfaces, utils
 
+
 NO_DURATION = datetime.timedelta()
+
 
 class AnnotationsMapping(OOBTree):
     "a class on which security settings may be hung"

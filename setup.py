@@ -31,10 +31,7 @@ setup(
     tests_require=tests_require,
     extras_require={'test': tests_require},
     description=open("README.txt").read(),
-    long_description=(
-        open('src/zope/locking/CHANGES.txt').read() +
-        '\n\n' +
-        open("src/zope/locking/README.txt").read()),
+    long_description=open('src/zope/locking/CHANGES.txt'),
     author='Zope Project',
     author_email='zope3-dev@zope.org',
     url='http://pypi.python.org/pypi/zope.locking',

@@ -2,6 +2,11 @@
 Changes
 =======
 
+----------------
+1.3 (unreleased)
+----------------
+
+- revived from svn.zope.org, removed browser parts, update dependencies.
 
 ------------------
 1.2.2 (2011-01-31)

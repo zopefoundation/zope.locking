@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+version="1.3",
+
 tests_require=[
     'zope.app.appsetup',
     'transaction',
@@ -7,7 +9,7 @@ tests_require=[
 
 setup(
     name="zope.locking",
-    version="1.3dev",
+    version=version,
     license='ZPL 2.1',
     packages=find_packages('src'),
     package_dir={'':'src'},

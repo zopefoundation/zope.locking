@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version="1.3",
+version = '1.3+md1'
 
 tests_require=[
     'zope.app.appsetup',
@@ -33,7 +33,7 @@ setup(
     tests_require=tests_require,
     extras_require={'test': tests_require},
     description=open("README.txt").read(),
-    long_description=open('src/zope/locking/CHANGES.txt'),
+    long_description=open('CHANGES.txt').read(),
     author='Zope Project',
     author_email='zope3-dev@zope.org',
     url='http://pypi.python.org/pypi/zope.locking',

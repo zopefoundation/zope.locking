@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.3+md1'
+version = '1.3+md2.dev0'
 
 tests_require=[
     'zope.app.appsetup',

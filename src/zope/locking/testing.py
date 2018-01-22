@@ -22,14 +22,18 @@ import zope.locking
 class IDemo(zope.interface.Interface):
     """a demonstration interface for a demonstration class"""
 
-class Demo(object):
-    zope.interface.implements(IDemo)
 
+@zope.interface.implementer(IDemo)
+class Demo(object):
+    pass
+
+
+@zope.interface.implementer(zope.keyreference.interfaces.IKeyReference)
 class DemoKeyReference(object):
-    zope.interface.implements(zope.keyreference.interfaces.IKeyReference)
     zope.component.adapts(IDemo)
 
     _class_counter = 0
+
     key_type_id = 'zope.locking.testing.DemoKeyReference'
 
     def __init__(self, context):
@@ -47,10 +51,15 @@ class DemoKeyReference(object):
     def __hash__(self):
         return (self.key_type_id, self._id)
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
         if self.key_type_id == other.key_type_id:
-            return cmp(self._id, other._id)
-        return cmp(self.key_type_id, other.key_type_id)
+            return self._id == other._id
+        return self.key_type_id == other.key_type_id
+
+    def __lt__(self, other):
+        if self.key_type_id == other.key_type_id:
+            return self._id < other._id
+        return self.key_type_id < other.key_type_id
 
 
 layer = zope.app.appsetup.testlayer.ZODBLayer(zope.locking)

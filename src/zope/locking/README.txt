@@ -157,17 +157,17 @@ same object.
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> util.register(tokens.SharedLock(demo, ('mary', 'jane')))
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> util.register(tokens.Freeze(demo))
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
 
 It's also worth looking at the lock token itself.  The registered lock token
 implements IExclusiveLock.
@@ -264,7 +264,7 @@ Don't try to end an already-ended token.
     >>> lock.end()
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 The other way of ending a token is with an expiration datetime.  As we'll see,
 one of the most important caveats about working with timeouts is that a token
@@ -378,14 +378,14 @@ is, no event is fired.
     >>> lock.end()
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 Once a lock has ended, the timeout can no longer be changed.
 
     >>> lock.duration = datetime.timedelta(days=2)
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 We'll undo the hacks, and also end the lock (that is no longer ended once
 the hack is finished).
@@ -400,11 +400,11 @@ in a state that is not fully initialized.
     >>> lock.started # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    UnregisteredError: ...
+    zope.locking.interfaces.UnregisteredError: ...
     >>> lock.ended # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    UnregisteredError: ...
+    zope.locking.interfaces.UnregisteredError: ...
 
 ------------
 Shared Locks
@@ -523,11 +523,11 @@ an error.
     >>> lock.add(('john',))
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
     >>> lock.remove(('john',))
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 The token utility keeps track of shared lock tokens the same as exclusive lock
 tokens.  Here's a quick summary in code.
@@ -545,17 +545,17 @@ tokens.  Here's a quick summary in code.
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> util.register(tokens.SharedLock(demo, ('mary', 'jane')))
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> util.register(tokens.Freeze(demo))
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> lock.end()
 
 Timed expirations work the same as with exclusive locks.  We won't repeat that
@@ -689,14 +689,14 @@ demonstration we are simplifying the registration.
     >>> broker.lock('joe')
     Traceback (most recent call last):
     ...
-    ParticipationError
+    zope.locking.interfaces.ParticipationError
 
 If we set up an interaction with one participation, the lock will have a
 better chance.
 
     >>> import zope.security.interfaces
-    >>> class DemoPrincipal(object):
-    ...     interface.implements(zope.security.interfaces.IPrincipal)
+    >>> @interface.implementer(zope.security.interfaces.IPrincipal)
+    ... class DemoPrincipal(object):
     ...     def __init__(self, id, title=None, description=None):
     ...         self.id = id
     ...         self.title = title
@@ -704,8 +704,8 @@ better chance.
     ...
     >>> joe = DemoPrincipal('joe')
     >>> import zope.security.management
-    >>> class DemoParticipation(object):
-    ...     interface.implements(zope.security.interfaces.IParticipation)
+    >>> @interface.implementer(zope.security.interfaces.IParticipation)
+    ... class DemoParticipation(object):
     ...     def __init__(self, principal):
     ...         self.principal = principal
     ...         self.interaction = None
@@ -737,7 +737,7 @@ You can only specify principals that are in the current interaction.
     >>> broker.lock('mary')
     Traceback (most recent call last):
     ...
-    ParticipationError
+    zope.locking.interfaces.ParticipationError
 
 The method can take a duration.
 
@@ -759,7 +759,7 @@ interaction) must be specified.
     >>> broker.lock('susan')
     Traceback (most recent call last):
     ...
-    ParticipationError
+    zope.locking.interfaces.ParticipationError
     >>> token = broker.lock('joe')
     >>> sorted(token.principal_ids)
     ['joe']
@@ -786,7 +786,7 @@ interaction:
     >>> broker.lockShared(('joe',))
     Traceback (most recent call last):
     ...
-    ParticipationError
+    zope.locking.interfaces.ParticipationError
 
 With an interaction, the principals get the lock by default.
 
@@ -816,7 +816,7 @@ You can only specify principals that are in the current interaction.
     >>> broker.lockShared(('mary',))
     Traceback (most recent call last):
     ...
-    ParticipationError
+    zope.locking.interfaces.ParticipationError
 
 The method can take a duration.
 
@@ -950,19 +950,19 @@ is in an interaction with only the lock owner.
     >>> handler.duration = two # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> handler.expiration = handler.started + three # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> handler.remaining_duration = two # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> handler.release() # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> lock.end()
 
 SharedLockHandlers
@@ -999,19 +999,19 @@ represented as they want. Other policies could be written in other adapters.
     >>> handler.duration = two # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> handler.expiration = handler.started + three # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> handler.remaining_duration = two # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> handler.release() # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
 
 The shared lock handler adds two additional methods to a standard handler:
 `join` and `add`.  They do similar jobs, but are separate to allow separate
@@ -1024,7 +1024,7 @@ principals in the current interaction join.
     >>> handler.join(('susan',))
     Traceback (most recent call last):
     ...
-    ParticipationError
+    zope.locking.interfaces.ParticipationError
 
 The `add` method lets any principal ids be added to the lock, but all
 principals in the current interaction must be a part of the lock.
@@ -1036,7 +1036,7 @@ principals in the current interaction must be a part of the lock.
     >>> handler.add('jake') # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    ParticipationError: ...
+    zope.locking.interfaces.ParticipationError: ...
     >>> lock.end()
     >>> zope.security.management.endInteraction()
 

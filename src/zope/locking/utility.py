@@ -22,8 +22,8 @@ from zope.location import Location
 from zope.locking import interfaces, utils
 
 
+@interface.implementer(interfaces.ITokenUtility)
 class TokenUtility(persistent.Persistent, Location):
-    interface.implements(interfaces.ITokenUtility)
 
     def __init__(self):
         self._locks = OOBTree()
@@ -116,7 +116,7 @@ class TokenUtility(persistent.Persistent, Location):
             frozenset(token.principal_ids),
             endable and token.expiration or None)
         if (endable and
-            token.expiration is not None):
+                token.expiration is not None):
             self._add(self._expirations, token, token.expiration)
         for p in token.principal_ids:
             self._add(self._principal_ids, token, p)
@@ -127,7 +127,8 @@ class TokenUtility(persistent.Persistent, Location):
     def get(self, obj, default=None):
         res = self._locks.get(IKeyReference(obj))
         if res is not None and (
-            not interfaces.IEndable.providedBy(res[0]) or not res[0].ended):
+                not interfaces.IEndable.providedBy(res[0])
+                or not res[0].ended):
             return res[0]
         return default
 

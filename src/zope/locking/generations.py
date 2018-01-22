@@ -19,11 +19,9 @@ import zope.locking.interfaces
 import zope.locking.utils
 
 
+@zope.interface.implementer(
+    zope.generations.interfaces.IInstallableSchemaManager)
 class SchemaManager(object):
-
-    zope.interface.implements(
-        zope.generations.interfaces.IInstallableSchemaManager)
-
     minimum_generation = 2
     generation = 2
 
@@ -41,6 +39,7 @@ class SchemaManager(object):
 
 
 schemaManager = SchemaManager()
+
 
 def get_site_managers(app_root):
     def _get_site_managers(sm):

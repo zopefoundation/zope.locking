@@ -18,9 +18,9 @@ from zope import interface, component
 from zope.locking import interfaces, tokens
 
 
+@interface.implementer(interfaces.ITokenBroker)
 class TokenBroker(object):
     component.adapts(interface.Interface)
-    interface.implements(interfaces.ITokenBroker)
 
     def __init__(self, context):
         self.context = self.__parent__ = context
@@ -31,10 +31,10 @@ class TokenBroker(object):
     def _getLockPrincipalId(self, principal_id):
         interaction_principals = getInteractionPrincipals()
         if principal_id is None:
-            if (interaction_principals is None or
-                len(interaction_principals) != 1):
+            if (interaction_principals is None
+                    or len(interaction_principals) != 1):
                 raise ValueError
-            principal_id = iter(interaction_principals).next()
+            principal_id = next(iter(interaction_principals))
         elif (interaction_principals is None or
               principal_id not in interaction_principals):
             raise interfaces.ParticipationError
@@ -49,8 +49,8 @@ class TokenBroker(object):
     def _getSharedLockPrincipalIds(self, principal_ids):
         interaction_principals = getInteractionPrincipals()
         if principal_ids is None:
-            if (interaction_principals is None or
-                len(interaction_principals) < 1):
+            if (interaction_principals is None
+                    or len(interaction_principals) < 1):
                 raise ValueError
             principal_ids = interaction_principals
         elif (interaction_principals is None or
@@ -70,11 +70,12 @@ class TokenBroker(object):
     def get(self):
         return self.utility.get(self.context)
 
+
 def getInteractionPrincipals():
     interaction = zope.security.management.queryInteraction()
     if interaction is not None:
         return set(p.principal.id for p in interaction.participations)
-    # return None
+
 
 class TokenHandler(object):
     def __init__(self, token):
@@ -104,39 +105,40 @@ class TokenHandler(object):
                     raise ValueError(p)
         return principal_ids, interaction_principals, token_principals
 
-    @apply
-    def expiration():
-        def get(self):
-            return self.token.expiration
-        def set(self, value):
-            self._checkInteraction()
-            self.token.expiration = value
-        return property(get, set)
+    @property
+    def expiration(self):
+        return self.token.expiration
 
-    @apply
-    def duration():
-        def get(self):
-            return self.token.duration
-        def set(self, value):
-            self._checkInteraction()
-            self.token.duration = value
-        return property(get, set)
+    @expiration.setter
+    def expiration(self, value):
+        self._checkInteraction()
+        self.token.expiration = value
 
-    @apply
-    def remaining_duration():
-        def get(self):
-            return self.token.remaining_duration
-        def set(self, value):
-            self._checkInteraction()
-            self.token.remaining_duration = value
-        return property(get, set)
+    @property
+    def duration(self):
+        return self.token.duration
+
+    @duration.setter
+    def duration(self, value):
+        self._checkInteraction()
+        self.token.duration = value
+
+    @property
+    def remaining_duration(self):
+        return self.token.remaining_duration
+
+    @remaining_duration.setter
+    def remaining_duration(self, value):
+        self._checkInteraction()
+        self.token.remaining_duration = value
 
     def release(self, principal_ids=None):
         raise NotImplementedError
 
+
+@interface.implementer(interfaces.IExclusiveLockHandler)
 class ExclusiveLockHandler(TokenHandler):
     component.adapts(interfaces.IExclusiveLock)
-    interface.implements(interfaces.IExclusiveLockHandler)
 
     def release(self, principal_ids=None):
         pids, interaction_pids, token_pids = self._getPrincipalIds(
@@ -145,9 +147,10 @@ class ExclusiveLockHandler(TokenHandler):
         if not remaining:
             self.token.end()
 
+
+@interface.implementer(interfaces.ISharedLockHandler)
 class SharedLockHandler(TokenHandler):
     component.adapts(interfaces.ISharedLock)
-    interface.implements(interfaces.ISharedLockHandler)
 
     def release(self, principal_ids=None):
         pids, interaction_pids, token_pids = self._getPrincipalIds(

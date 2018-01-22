@@ -27,6 +27,7 @@ version = '1.3+md2.dev0'
 tests_require = [
     'transaction',
     'zope.app.appsetup',
+    'zope.testing'
     ]
 
 

@@ -20,7 +20,7 @@
 """
 from setuptools import setup, find_packages
 
-version = '1.3+md3.dev0'
+version = '3.0.0.dev0'
 
 
 tests_require = [

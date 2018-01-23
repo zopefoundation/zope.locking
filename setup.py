@@ -26,7 +26,8 @@ version = '3.0.0.dev0'
 tests_require = [
     'transaction',
     'zope.app.appsetup',
-    'zope.testing'
+    'zope.testing',
+    'zope.testrunner',
     ]
 
 

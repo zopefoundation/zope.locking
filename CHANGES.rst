@@ -6,6 +6,8 @@ Changes
 2.0.0 (unreleased)
 ------------------
 
+- Python 3 compatibility.
+
 - Note: The browser views and related code where removed. You need to provide
   those in application-level code now.
 

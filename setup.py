@@ -18,7 +18,15 @@
 ##############################################################################
 """Setup for zope.locking package
 """
+import os.path
+
 from setuptools import setup, find_packages
+
+
+def read(*rnames):
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
+        return f.read()
+
 
 version = '3.0.0.dev0'
 
@@ -56,9 +64,37 @@ setup(
     zip_safe=False,
     tests_require=tests_require,
     extras_require={'test': tests_require},
-    description=open("README.txt").read(),
-    long_description=open('CHANGES.txt').read(),
+    description=(
+        'Advisory exclusive locks, shared locks, and freezes '
+        '(locked to no-one).'),
+    long_description=(
+        read('README.txt')
+        + '\n\n' +
+        read('src', 'zope', 'locking', 'README.txt')
+        + '\n\n' +
+        read('CHANGES.txt')
+        ),
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Zope Public License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Topic :: Internet :: WWW/HTTP',
+        'Framework :: Zope3',
+        ],
     author='Zope Project',
     author_email='zope3-dev@zope.org',
-    url='http://pypi.python.org/pypi/zope.locking',
+    url='http://github.com/zopefoundation/zope.locking',
     )

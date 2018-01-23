@@ -28,7 +28,7 @@ def read(*rnames):
         return f.read()
 
 
-version = '3.0.0.dev0'
+version = '2.0.0.dev0'
 
 
 tests_require = [

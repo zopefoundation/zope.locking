@@ -3,7 +3,7 @@ Changes
 =======
 
 ------------------
-3.0.0 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
 - Note: The browser views and related code where removed. You need to provide

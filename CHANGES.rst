@@ -2,10 +2,20 @@
 Changes
 =======
 
-----------------
-1.3 (unreleased)
-----------------
+------------------
+2.0.0 (unreleased)
+------------------
 
+- Python 3 compatibility.
+
+- Note: The browser views and related code where removed. You need to provide
+  those in application-level code now.
+
+- Package the zcml files.
+
+- Updated dependencies.
+
+- Revived from svn.zope.org
 
 ------------------
 1.2.2 (2011-01-31)
@@ -15,7 +25,6 @@ Changes
 
 - Split generations config into its own zcml file.
 
-
 ------------------
 1.2.1 (2010-01-20)
 ------------------
@@ -23,7 +32,6 @@ Changes
 - Bug fix: the generation added in 1.2 did not properly clean up
   expired tokens, and could leave the token utility in an inconsistent
   state.
-
 
 ----------------
 1.2 (2009-11-23)

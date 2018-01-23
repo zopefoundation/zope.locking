@@ -11,11 +11,13 @@ This is some setup that the tests need.
 
     >>> from zope import interface, component
 
+    >>> conn = get_connection()
     >>> conn.add(util)
 
     >>> import datetime
     >>> import pytz
     >>> before_creation = datetime.datetime.now(pytz.utc)
+    >>> from zope.locking.testing import Demo
     >>> demo = Demo()
 
 ----------------------------------
@@ -61,6 +63,7 @@ fire events.  First we'll change the expiration attribute.
     True
     >>> lock.duration == one
     True
+    >>> from zope.component.eventtesting import events
     >>> ev = events[-1]
     >>> verifyObject(interfaces.IExpirationChangedEvent, ev)
     True
@@ -135,14 +138,14 @@ is, no event is fired.
     >>> lock.end()
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 Once a lock has ended, the timeout can no longer be changed.
 
     >>> lock.duration = datetime.timedelta(days=2)
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 We'll undo the hacks, and also end the lock (that is no longer ended once
 the hack is finished).
@@ -212,17 +215,17 @@ object.
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> util.register(tokens.SharedLock(demo, ('mary', 'jane')))
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> util.register(tokens.EndableFreeze(demo))
     ... # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    RegistrationError: ...
+    zope.locking.interfaces.RegistrationError: ...
     >>> token.end()
     >>> util.get(demo) is None
     True
@@ -334,14 +337,14 @@ is, no event is fired.
     >>> token.end()
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 Once a token has ended, the timeout can no longer be changed.
 
     >>> token.duration = datetime.timedelta(days=2)
     Traceback (most recent call last):
     ...
-    EndedError
+    zope.locking.interfaces.EndedError
 
 We'll undo the hacks, and also end the token (that is no longer ended once
 the hack is finished).

@@ -1,96 +1,9 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     i18n_domain="zope.locking">
-
-  <!-- the utility -->
-  <class class=".utility.TokenUtility">
-    <require permission="zope.ManageServices"
-      interface=".interfaces.ITokenUtility" />
-  </class>
-
-  <!-- the annotations mapping -->
-  <class class=".tokens.AnnotationsMapping">
-    <require permission="zope.View"
-      interface="zope.interface.common.mapping.IEnumerableMapping"
-      />
-  </class>
-
-  <!-- the tokens -->
-  <class class=".tokens.Freeze">
-    <require permission="zope.View"
-      attributes="context utility principal_ids started annotations" />
-  </class>
-
-  <class class=".tokens.ExclusiveLock">
-    <require like_class=".tokens.Freeze" />
-    <require permission="zope.View"
-      attributes="ended expiration duration remaining_duration" />
-    <require permission="zope.Security"
-      attributes="end"
-      set_attributes="expiration duration remaining_duration" />
-  </class>
-
-  <class class=".tokens.SharedLock">
-    <require like_class=".tokens.ExclusiveLock" />
-    <require permission="zope.Security"
-      attributes="add remove" />
-  </class>
-
-  <class class=".tokens.EndableFreeze">
-    <require like_class=".tokens.ExclusiveLock" />
-  </class>
-
-  <!-- token broker -->
-  <class class=".adapters.TokenBroker">
-    <require permission="zope.ManageContent"
-      attributes="lock lockShared" />
-    <require permission="zope.View"
-      attributes="get" />
-    <require permission="zope.Security"
-      attributes="freeze" />
-  </class>
-
-  <adapter factory=".adapters.TokenBroker" trusted="1" />
-
-  <!-- token handlers -->
-  <class class=".adapters.ExclusiveLockHandler">
-    <require permission="zope.View"
-      attributes="context utility principal_ids started
-      ended expiration duration remaining_duration" />
-    <require permission="zope.Security"
-      attributes="end" />
-    <!-- these have their own security policy -->
-    <require permission="zope.Public" attributes="release"
-      set_attributes="expiration duration remaining_duration" />
-  </class>
-
-  <adapter factory=".adapters.ExclusiveLockHandler" trusted="1" />
-
-  <class class=".adapters.SharedLockHandler">
-    <require like_class=".adapters.ExclusiveLockHandler" />
-    <require permission="zope.Security" attributes="join" />
-    <!-- add has its own security policy -->
-    <require permission="zope.Public" attributes="add" />
-  </class>
-
-  <adapter factory=".adapters.SharedLockHandler" trusted="1" />
-
-  <include package=".browser" />
+  <adapter factory=".adapters.TokenBroker" />
+  <adapter factory=".adapters.ExclusiveLockHandler" />
+  <adapter factory=".adapters.SharedLockHandler" />
 
   <include file="generations.zcml" />
-
-  <configure
-    xmlns:zcml="http://namespaces.zope.org/zcml"
-    zcml:condition="have apidoc"
-    xmlns="http://namespaces.zope.org/apidoc"
-    >
-
-    <bookchapter
-      id="zopelockingreadme.txt"
-      title="Locking API"
-      doc_path="README.txt"
-      />
-
-  </configure>
-
 </configure>

@@ -1,6 +1,6 @@
-##############################################################################
+#############################################################################
 #
-# Copyright (c) 2005 Zope Corporation and Contributors.
+# Copyright (c) 2018 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -17,13 +17,13 @@ Locking interfaces
 $Id: $
 """
 from zope import interface, schema
-
 from zope.component.interfaces import IObjectEvent, ObjectEvent
-from zope.locking.i18n import _
+
 
 ##############################################################################
 # Token utility
 ##############################################################################
+
 
 class ITokenUtility(interface.Interface):
     """Responsible for initializing, registering, and finding all active tokens
@@ -53,9 +53,11 @@ class ITokenUtility(interface.Interface):
         If lock has never been registered before, fires TokenStartedEvent.
         """
 
+
 ##############################################################################
 # General (abstract) token interfaces
 ##############################################################################
+
 
 class IAbstractToken(interface.Interface):
     """A token.  Must be registered with token utility to start.
@@ -84,10 +86,11 @@ class IAbstractToken(interface.Interface):
         an iterable with no members.  Readonly.""")
 
     started = schema.Datetime(
-        description=_("""the date and time, with utc timezone, that the token
+        description=(u"""the date and time, with utc timezone, that the token
         was registered with the token utility and became effective.  Required
         after the token has been registered."""),
         required=False, readonly=True)
+
 
 class IEndable(interface.Interface):
     """A mixin for tokens that may be ended explicitly or timed out.
@@ -97,29 +100,29 @@ class IEndable(interface.Interface):
     """
 
     ended = schema.Datetime(
-        description=_("""the date and time, with utc timezone, that the token
+        description=(u"""the date and time, with utc timezone, that the token
         ended, explicitly or from expiration."""),
         required=False, readonly=True)
 
     expiration = schema.Datetime(
-        description=_(
-            """the expiration time, with utc timezone.
+        description=(
+            u"""the expiration time, with utc timezone.
             None indicates no expiration.
             Readonly (but see extending interfaces).
             """),
         required=False)
 
     duration = schema.Timedelta(
-        description=_(
-            """the duration of the token timeout from its start.
+        description=(
+            u"""the duration of the token timeout from its start.
             None indicates no expiration.
             Readonly (but see extending interfaces).
             """),
         required=False)
 
     remaining_duration = schema.Timedelta(
-        description=_(
-            """the remaining effective duration for the token from "now".
+        description=(
+            u"""the remaining effective duration for the token from "now".
             None indicates no expiration.  If the token has ended, return
             a datetime.timedelta of no time.
             Readonly (but see extending interfaces).
@@ -132,11 +135,13 @@ class IEndable(interface.Interface):
         fires TokenEndedEvent if successful, or raises EndedError
         if the token has already ended."""
 
+
 ##############################################################################
 # Token interfaces: registered by token utility
 ##############################################################################
 
 # Abstract token interfaces
+
 
 class IToken(IAbstractToken):
     """a token that actually stores data.
@@ -160,8 +165,8 @@ class IEndableToken(IToken, IEndable):
     """A standard endable token."""
 
     expiration = schema.Datetime(
-        description=_(
-            """the expiration time, with utc timezone.
+        description=(
+            u"""the expiration time, with utc timezone.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             Otherwise call utility.register, fire ExpirationChangedEvent.
@@ -169,8 +174,8 @@ class IEndableToken(IToken, IEndable):
         required=False)
 
     duration = schema.Timedelta(
-        description=_(
-            """the duration of the token timeout from its start.
+        description=(
+            u"""the duration of the token timeout from its start.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             Otherwise call utility.register, fire ExpirationChangedEvent.
@@ -178,8 +183,8 @@ class IEndableToken(IToken, IEndable):
         required=False)
 
     remaining_duration = schema.Timedelta(
-        description=_(
-            """the remaining effective duration for the token from "now".
+        description=(
+            u"""the remaining effective duration for the token from "now".
             None indicates no expiration.  If the token has ended, return
             a datetime.timedelta of no time.
             When setting, if token has ended then raise EndedError.
@@ -187,12 +192,15 @@ class IEndableToken(IToken, IEndable):
             """),
         required=False)
 
+
 # Concrete token interfaces
+
 
 class IExclusiveLock(IEndableToken):
     """a lock held to one and only one principal.
 
     principal_ids must always have one and only one member."""
+
 
 class ISharedLock(IEndableToken):
     "a lock held by one or more principals"
@@ -215,17 +223,21 @@ class ISharedLock(IEndableToken):
 
         If ended, raise EndedError."""
 
+
 class IFreeze(IToken):
     """principal_ids must always be empty.
 
     May not be ended."""
 
+
 class IEndableFreeze(IFreeze, IEndableToken):
     """May be ended."""
+
 
 ##############################################################################
 # Token broker interface
 ##############################################################################
+
 
 class ITokenBroker(interface.Interface):
     """for one object, create standard endable tokens and get active ITokens.
@@ -270,6 +282,7 @@ class ITokenBroker(interface.Interface):
 
     def get():
         """Get context's active IToken, or None.
+
         """
 
 ##############################################################################
@@ -277,6 +290,7 @@ class ITokenBroker(interface.Interface):
 ##############################################################################
 
 # Abstract token handler interfaces.
+
 
 class ITokenHandler(IAbstractToken, IEndable):
     """give appropriate increased access in a security system.
@@ -292,8 +306,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         data storage""")
 
     expiration = schema.Datetime(
-        description=_(
-            """the expiration time, with utc timezone.
+        description=(
+            u"""the expiration time, with utc timezone.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             If all of the principals in the current interaction are not owners
@@ -303,8 +317,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         required=False)
 
     duration = schema.Timedelta(
-        description=_(
-            """the duration of the token timeout from its start.
+        description=(
+            u"""the duration of the token timeout from its start.
             None indicates no expiration.
             When setting, if token has ended then raise EndedError.
             If all of the principals in the current interaction are not owners
@@ -314,8 +328,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         required=False)
 
     remaining_duration = schema.Timedelta(
-        description=_(
-            """the remaining effective duration for the token from "now".
+        description=(
+            u"""the remaining effective duration for the token from "now".
             None indicates no expiration.  If the token has ended, return
             a datetime.timedelta of no time.
             When setting, if token has ended then raise EndedError.
@@ -325,7 +339,7 @@ class ITokenHandler(IAbstractToken, IEndable):
             """),
         required=False)
 
-    def release(principal_ids=None): # may only remove ids in interaction
+    def release(principal_ids=None):  # may only remove ids in interaction.
         """remove the given principal_ids from the token, or all in interaction.
         All explicitly given principal_ids must be in interaction.  Silently
         ignores requests to remove principals who are not currently part of
@@ -336,10 +350,13 @@ class ITokenHandler(IAbstractToken, IEndable):
         Raises EndedError if lock has already ended.
         """
 
+
 # Concrete principal token interfaces.
+
 
 class IExclusiveLockHandler(ITokenHandler):
     """an exclusive lock"""
+
 
 class ISharedLockHandler(ITokenHandler):
     """a shared lock"""
@@ -358,69 +375,88 @@ class ISharedLockHandler(ITokenHandler):
         If all of the principals in the current interaction are not owners
         of the current token (in principal_ids), raise ParticipationError."""
 
+
 ##############################################################################
 # Events
 ##############################################################################
 
 # event interfaces
 
+
 class ITokenEvent(IObjectEvent):
     """a token event"""
 
+
 class ITokenStartedEvent(ITokenEvent):
     """An token has started"""
+
 
 class ITokenEndedEvent(ITokenEvent):
     """A token has been explicitly ended.
 
     Note that this is not fired when a lock expires."""
 
+
 class IPrincipalsChangedEvent(ITokenEvent):
     """Principals have changed for a token"""
 
     old = interface.Attribute('a frozenset of the old principals')
+
 
 class IExpirationChangedEvent(ITokenEvent):
     """Expiration value changed for a token"""
 
     old = interface.Attribute('the old expiration value')
 
+
 # events
 
+
+@interface.implementer(ITokenStartedEvent)
 class TokenStartedEvent(ObjectEvent):
-    interface.implements(ITokenStartedEvent)
+    pass
 
+
+@interface.implementer(ITokenEndedEvent)
 class TokenEndedEvent(ObjectEvent):
-    interface.implements(ITokenEndedEvent)
+    pass
 
+
+@interface.implementer(IPrincipalsChangedEvent)
 class PrincipalsChangedEvent(ObjectEvent):
-    interface.implements(IPrincipalsChangedEvent)
     def __init__(self, object, old):
         super(PrincipalsChangedEvent, self).__init__(object)
         self.old = frozenset(old)
 
+
+@interface.implementer(IExpirationChangedEvent)
 class ExpirationChangedEvent(ObjectEvent):
-    interface.implements(IExpirationChangedEvent)
     def __init__(self, object, old):
         super(ExpirationChangedEvent, self).__init__(object)
         self.old = old
+
 
 ##############################################################################
 # Exceptions
 ##############################################################################
 
+
 class TokenRuntimeError(RuntimeError):
     """A general runtime error in the token code."""
+
 
 class EndedError(TokenRuntimeError):
     """The token has ended"""
 
+
 class UnregisteredError(TokenRuntimeError):
     """The token has not yet been registered"""
+
 
 class ParticipationError(TokenRuntimeError):
     """Some or all of the principals in the current interaction do not
     participate in the token"""
+
 
 class RegistrationError(TokenRuntimeError):
     """The token may not be registered"""

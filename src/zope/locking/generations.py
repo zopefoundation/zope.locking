@@ -1,15 +1,27 @@
+#############################################################################
+#
+# Copyright (c) 2018 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+
 import BTrees.OOBTree
-import zope.app.generations.interfaces
+import zope.generations.interfaces
 import zope.interface
 import zope.locking.interfaces
 import zope.locking.utils
 
 
+@zope.interface.implementer(
+    zope.generations.interfaces.IInstallableSchemaManager)
 class SchemaManager(object):
-
-    zope.interface.implements(
-        zope.app.generations.interfaces.IInstallableSchemaManager)
-
     minimum_generation = 2
     generation = 2
 
@@ -27,6 +39,7 @@ class SchemaManager(object):
 
 
 schemaManager = SchemaManager()
+
 
 def get_site_managers(app_root):
     def _get_site_managers(sm):

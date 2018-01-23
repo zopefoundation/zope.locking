@@ -1,18 +1,29 @@
+##############################################################################
+#
+# Copyright (c) 2018 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+
 import persistent
 import persistent.interfaces
 
 from BTrees.OOBTree import OOBTree, OOTreeSet
-from zope import interface, component, event
-
-from zope.app.keyreference.interfaces import IKeyReference
-
+from zope import interface, event
+from zope.keyreference.interfaces import IKeyReference
 from zope.location import Location
-
 from zope.locking import interfaces, utils
-from zope.locking.i18n import _
 
+
+@interface.implementer(interfaces.ITokenUtility)
 class TokenUtility(persistent.Persistent, Location):
-    interface.implements(interfaces.ITokenUtility)
 
     def __init__(self):
         self._locks = OOBTree()
@@ -105,7 +116,7 @@ class TokenUtility(persistent.Persistent, Location):
             frozenset(token.principal_ids),
             endable and token.expiration or None)
         if (endable and
-            token.expiration is not None):
+                token.expiration is not None):
             self._add(self._expirations, token, token.expiration)
         for p in token.principal_ids:
             self._add(self._principal_ids, token, p)
@@ -116,7 +127,8 @@ class TokenUtility(persistent.Persistent, Location):
     def get(self, obj, default=None):
         res = self._locks.get(IKeyReference(obj))
         if res is not None and (
-            not interfaces.IEndable.providedBy(res[0]) or not res[0].ended):
+                not interfaces.IEndable.providedBy(res[0])
+                or not res[0].ended):
             return res[0]
         return default
 

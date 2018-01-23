@@ -34,8 +34,9 @@ Let's run through some examples and check the data structures as we go.  We'll
 need to start with some setup.
 
     >>> from zope.locking import utility, interfaces, tokens
-    >>> from zope.app.keyreference.interfaces import IKeyReference
+    >>> from zope.keyreference.interfaces import IKeyReference
     >>> util = utility.TokenUtility()
+    >>> conn = get_connection()
     >>> conn.add(util)
     >>> from zope.interface.verify import verifyObject
     >>> verifyObject(interfaces.ITokenUtility, util)
@@ -44,6 +45,7 @@ need to start with some setup.
     >>> import datetime
     >>> import pytz
     >>> before_creation = datetime.datetime.now(pytz.utc)
+    >>> from zope.locking.testing import Demo
     >>> demo = Demo()
 
     >>> NO_TIME = datetime.timedelta()
@@ -79,7 +81,7 @@ expiration).
 
     >>> len(util._locks)
     1
-    >>> key_ref = iter(util._locks).next()
+    >>> key_ref = next(iter(util._locks))
     >>> key_ref() is demo
     True
     >>> token, principal_ids, expiration = util._locks[key_ref]
@@ -105,7 +107,7 @@ of the one lock.
 
     >>> len(util._expirations)
     1
-    >>> iter(util._expirations).next() == lock.expiration
+    >>> next(iter(util._expirations)) == lock.expiration
     True
     >>> list(util._expirations[lock.expiration]) == [lock]
     True
@@ -124,7 +126,7 @@ The `_locks` index still has a single entry.
 
     >>> len(util._locks)
     1
-    >>> key_ref = iter(util._locks).next()
+    >>> key_ref = next(iter(util._locks))
     >>> key_ref() is demo
     True
     >>> token, principal_ids, expiration = util._locks[key_ref]
@@ -148,7 +150,7 @@ of the one lock.
 
     >>> len(util._expirations)
     1
-    >>> iter(util._expirations).next() == lock.expiration
+    >>> next(iter(util._expirations)) == lock.expiration
     True
     >>> list(util._expirations[lock.expiration]) == [lock]
     True
@@ -361,7 +363,7 @@ in that it uses multiple connections to the database.
     ...   """
     ...   t = conn.transaction_manager.begin()
     ...   locks = list(token_util(conn).iterForPrincipalId(principal))
-    ...   res = len(map(lambda l: l.end(), locks[:n]))
+    ...   res = len([l.end() for l in locks[:n]])
     ...   t.commit()
     ...   return res
     >>> def get_locks(principal, conn):
@@ -377,8 +379,8 @@ in that it uses multiple connections to the database.
     >>> tm1 = transaction.TransactionManager()
     >>> tm2 = transaction.TransactionManager()
 
-    >>> conn1 = db.open(transaction_manager=tm1)
-    >>> conn2 = db.open(transaction_manager=tm2)
+    >>> conn1 = get_db().open(transaction_manager=tm1)
+    >>> conn2 = get_db().open(transaction_manager=tm2)
 
 We "install" the token utility.
 

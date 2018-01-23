@@ -1,18 +1,40 @@
+#############################################################################
+#
+# Copyright (c) 2018 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+
+import functools
+import zope.app.appsetup.testlayer
 import zope.component
 import zope.interface
-import zope.app.keyreference.interfaces
+import zope.keyreference.interfaces
+import zope.locking
+
 
 class IDemo(zope.interface.Interface):
     """a demonstration interface for a demonstration class"""
 
+
+@zope.interface.implementer(IDemo)
 class Demo(object):
-    zope.interface.implements(IDemo)
+    pass
 
+
+@functools.total_ordering
+@zope.component.adapter(IDemo)
+@zope.interface.implementer(zope.keyreference.interfaces.IKeyReference)
 class DemoKeyReference(object):
-    zope.interface.implements(zope.app.keyreference.interfaces.IKeyReference)
-    zope.component.adapts(IDemo)
-
     _class_counter = 0
+
     key_type_id = 'zope.locking.testing.DemoKeyReference'
 
     def __init__(self, context):
@@ -30,8 +52,11 @@ class DemoKeyReference(object):
     def __hash__(self):
         return (self.key_type_id, self._id)
 
-    def __cmp__(self, other):
-        if self.key_type_id == other.key_type_id:
-            return cmp(self._id, other._id)
-        return cmp(self.key_type_id, other.key_type_id)
+    def __eq__(self, other):
+        return (self.key_type_id, self._id) == (other.key_type_id, other._id)
 
+    def __lt__(self, other):
+        return (self.key_type_id, self._id) < (other.key_type_id, other._id)
+
+
+layer = zope.app.appsetup.testlayer.ZODBLayer(zope.locking)

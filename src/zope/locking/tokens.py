@@ -1,30 +1,49 @@
-import persistent
+#############################################################################
+#
+# Copyright (c) 2018 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+
 import datetime
+import functools
+import persistent
+
 from BTrees.OOBTree import OOBTree
-
-from zope import interface, component, event
-
+from zope import interface, event
 from zope.locking import interfaces, utils
-from zope.locking.i18n import _
+
 
 NO_DURATION = datetime.timedelta()
 
-class AnnotationsMapping(OOBTree):
-    "a class on which security settings may be hung"
 
+class AnnotationsMapping(OOBTree):
+    """a class on which security settings may be hung."""
+
+
+@functools.total_ordering
 class Token(persistent.Persistent):
 
     def __init__(self, target):
         self.context = self.__parent__ = target
         self.annotations = AnnotationsMapping()
-        self.annotations.__parent__ = self # for security
+        self.annotations.__parent__ = self  # for security.
 
     _principal_ids = frozenset()
+
     @property
     def principal_ids(self):
         return self._principal_ids
 
     _started = None
+
     @property
     def started(self):
         if self._utility is None:
@@ -32,24 +51,32 @@ class Token(persistent.Persistent):
         return self._started
 
     _utility = None
-    @apply
-    def utility():
-        def get(self):
-            return self._utility
-        def set(self, value):
-            if self._utility is not None:
-                if value is not self._utility:
-                    raise ValueError('cannot reset utility')
-            else:
-                assert interfaces.ITokenUtility.providedBy(value)
-                self._utility = value
-                assert self._started is None
-                self._started = utils.now()
-        return property(get, set)
 
-    def __cmp__(self, other):
-        return cmp((self._p_jar.db().database_name, self._p_oid),
+    @property
+    def utility(self):
+        return self._utility
+
+    @utility.setter
+    def utility(self, value):
+        if self._utility is not None:
+            if value is not self._utility:
+                raise ValueError('cannot reset utility')
+        else:
+            assert interfaces.ITokenUtility.providedBy(value)
+            self._utility = value
+            assert self._started is None
+            self._started = utils.now()
+
+    def __eq__(self, other):
+        return (
+            (self._p_jar.db().database_name, self._p_oid) ==
             (other._p_jar.db().database_name, other._p_oid))
+
+    def __lt__(self, other):
+        return (
+            (self._p_jar.db().database_name, self._p_oid) <
+            (other._p_jar.db().database_name, other._p_oid))
+
 
 class EndableToken(Token):
 
@@ -57,89 +84,62 @@ class EndableToken(Token):
         super(EndableToken, self).__init__(target)
         self._duration = duration
 
-    @apply
-    def utility():
-        def get(self):
-            return self._utility
-        def set(self, value):
-            if self._utility is not None:
-                if value is not self._utility:
-                    raise ValueError('cannot reset utility')
-            else:
-                assert interfaces.ITokenUtility.providedBy(value)
-                self._utility = value
-                assert self._started is None
-                self._started = utils.now()
-                if self._duration is not None:
-                    self._expiration = self._started + self._duration
-                    del self._duration # to catch bugs
-        return property(get, set)
+    @property
+    def utility(self):
+        return self._utility
+
+    @utility.setter
+    def utility(self, value):
+        if self._utility is not None:
+            if value is not self._utility:
+                raise ValueError('cannot reset utility')
+        else:
+            assert interfaces.ITokenUtility.providedBy(value)
+            self._utility = value
+            assert self._started is None
+            self._started = utils.now()
+            if self._duration is not None:
+                self._expiration = self._started + self._duration
+                del self._duration  # to catch bugs.
 
     _expiration = _duration = None
-    @apply
-    def expiration():
-        def get(self):
-            if self._started is None:
-                raise interfaces.UnregisteredError(self)
-            return self._expiration
-        def set(self, value):
-            if self._started is None:
-                raise interfaces.UnregisteredError(self)
-            if self.ended:
-                raise interfaces.EndedError
-            if value is not None:
-                if not isinstance(value, datetime.datetime):
-                    raise ValueError('expiration must be datetime.datetime')
-                elif value.tzinfo is None:
-                    raise ValueError('expiration must be timezone-aware')
-            old = self._expiration
-            self._expiration = value
-            if old != self._expiration:
-                self.utility.register(self)
-                event.notify(interfaces.ExpirationChangedEvent(self, old))
-        return property(get, set)
 
-    @apply
-    def duration():
-        def get(self):
-            if self._started is None:
-                return self._duration
-            if self._expiration is None:
-                return None
-            return self._expiration - self._started
-        def set(self, value):
-            if self._started is None:
-                self._duration = value
-            else:
-                if self.ended:
-                    raise interfaces.EndedError
-                old = self._expiration
-                if value is None:
-                    self._expiration = value
-                elif not isinstance(value, datetime.timedelta):
-                    raise ValueError('duration must be datetime.timedelta')
-                else:
-                    if value < NO_DURATION:
-                        raise ValueError('duration may not be negative')
-                    self._expiration = self._started + value
-                if old != self._expiration:
-                    self.utility.register(self)
-                    event.notify(interfaces.ExpirationChangedEvent(self, old))
-        return property(get, set)
+    @property
+    def expiration(self):
+        if self._started is None:
+            raise interfaces.UnregisteredError(self)
+        return self._expiration
 
-    @apply
-    def remaining_duration():
-        def get(self):
-            if self._started is None:
-                raise interfaces.UnregisteredError(self)
-            if self.ended is not None:
-                return NO_DURATION
-            if self._expiration is None:
-                return None
-            return self._expiration - utils.now()
-        def set(self, value):
-            if self._started is None:
-                raise interfaces.UnregisteredError(self)
+    @expiration.setter
+    def expiration(self, value):
+        if self._started is None:
+            raise interfaces.UnregisteredError(self)
+        if self.ended:
+            raise interfaces.EndedError
+        if value is not None:
+            if not isinstance(value, datetime.datetime):
+                raise ValueError('expiration must be datetime.datetime')
+            elif value.tzinfo is None:
+                raise ValueError('expiration must be timezone-aware')
+        old = self._expiration
+        self._expiration = value
+        if old != self._expiration:
+            self.utility.register(self)
+            event.notify(interfaces.ExpirationChangedEvent(self, old))
+
+    @property
+    def duration(self):
+        if self._started is None:
+            return self._duration
+        if self._expiration is None:
+            return None
+        return self._expiration - self._started
+
+    @duration.setter
+    def duration(self, value):
+        if self._started is None:
+            self._duration = value
+        else:
             if self.ended:
                 raise interfaces.EndedError
             old = self._expiration
@@ -150,13 +150,42 @@ class EndableToken(Token):
             else:
                 if value < NO_DURATION:
                     raise ValueError('duration may not be negative')
-                self._expiration = utils.now() + value
+                self._expiration = self._started + value
             if old != self._expiration:
                 self.utility.register(self)
                 event.notify(interfaces.ExpirationChangedEvent(self, old))
-        return property(get, set)
+
+    @property
+    def remaining_duration(self):
+        if self._started is None:
+            raise interfaces.UnregisteredError(self)
+        if self.ended is not None:
+            return NO_DURATION
+        if self._expiration is None:
+            return None
+        return self._expiration - utils.now()
+
+    @remaining_duration.setter
+    def remaining_duration(self, value):
+        if self._started is None:
+            raise interfaces.UnregisteredError(self)
+        if self.ended:
+            raise interfaces.EndedError
+        old = self._expiration
+        if value is None:
+            self._expiration = value
+        elif not isinstance(value, datetime.timedelta):
+            raise ValueError('duration must be datetime.timedelta')
+        else:
+            if value < NO_DURATION:
+                raise ValueError('duration may not be negative')
+            self._expiration = utils.now() + value
+        if old != self._expiration:
+            self.utility.register(self)
+            event.notify(interfaces.ExpirationChangedEvent(self, old))
 
     _ended = None
+
     @property
     def ended(self):
         if self._utility is None:
@@ -164,7 +193,7 @@ class EndableToken(Token):
         if self._ended is not None:
             return self._ended
         if (self._expiration is not None and
-            self._expiration <= utils.now()):
+                self._expiration <= utils.now()):
             return self._expiration
 
     def end(self):
@@ -174,15 +203,17 @@ class EndableToken(Token):
         self.utility.register(self)
         event.notify(interfaces.TokenEndedEvent(self))
 
+
+@interface.implementer(interfaces.IExclusiveLock)
 class ExclusiveLock(EndableToken):
-    interface.implements(interfaces.IExclusiveLock)
 
     def __init__(self, target, principal_id, duration=None):
         self._principal_ids = frozenset((principal_id,))
         super(ExclusiveLock, self).__init__(target, duration)
 
+
+@interface.implementer(interfaces.ISharedLock)
 class SharedLock(EndableToken):
-    interface.implements(interfaces.ISharedLock)
 
     def __init__(self, target, principal_ids, duration=None):
         self._principal_ids = frozenset(principal_ids)
@@ -211,8 +242,12 @@ class SharedLock(EndableToken):
         # principals changed if you got here
         event.notify(interfaces.PrincipalsChangedEvent(self, old))
 
-class EndableFreeze(EndableToken):
-    interface.implements(interfaces.IEndableFreeze)
 
+@interface.implementer(interfaces.IEndableFreeze)
+class EndableFreeze(EndableToken):
+    pass
+
+
+@interface.implementer(interfaces.IFreeze)
 class Freeze(Token):
-    interface.implements(interfaces.IFreeze)
+    pass

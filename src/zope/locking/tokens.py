@@ -13,6 +13,7 @@
 ##############################################################################
 
 import datetime
+import functools
 import persistent
 
 from BTrees.OOBTree import OOBTree
@@ -27,6 +28,7 @@ class AnnotationsMapping(OOBTree):
     """a class on which security settings may be hung."""
 
 
+@functools.total_ordering
 class Token(persistent.Persistent):
 
     def __init__(self, target):

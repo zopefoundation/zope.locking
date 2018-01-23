@@ -12,6 +12,7 @@
 #
 ##############################################################################
 
+import functools
 import zope.app.appsetup.testlayer
 import zope.component
 import zope.interface
@@ -28,6 +29,7 @@ class Demo(object):
     pass
 
 
+@functools.total_ordering
 @zope.interface.implementer(zope.keyreference.interfaces.IKeyReference)
 class DemoKeyReference(object):
     zope.component.adapts(IDemo)

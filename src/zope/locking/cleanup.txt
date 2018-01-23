@@ -363,7 +363,7 @@ in that it uses multiple connections to the database.
     ...   """
     ...   t = conn.transaction_manager.begin()
     ...   locks = list(token_util(conn).iterForPrincipalId(principal))
-    ...   res = len(list(map(lambda l: l.end(), locks[:n])))
+    ...   res = len([l.end() for l in locks[:n]])
     ...   t.commit()
     ...   return res
     >>> def get_locks(principal, conn):

@@ -68,11 +68,11 @@ setup(
         'Advisory exclusive locks, shared locks, and freezes '
         '(locked to no-one).'),
     long_description=(
-        read('README.txt')
+        read('README.rst')
         + '\n\n' +
-        read('src', 'zope', 'locking', 'README.txt')
+        read('src', 'zope', 'locking', 'README.rst')
         + '\n\n' +
-        read('CHANGES.txt')
+        read('CHANGES.rst')
         ),
     classifiers=[
         'Development Status :: 5 - Production/Stable',

@@ -29,21 +29,21 @@ def test_suite():
 
     suite = unittest.TestSuite((
         doctest.DocFileSuite(
-            'README.txt',
+            'README.rst',
             optionflags=doctest.IGNORE_EXCEPTION_DETAIL,
             globs=dict(
                 get_connection=get_connection,
                 get_db=get_db
             )),
         doctest.DocFileSuite(
-            'annoying.txt',
+            'annoying.rst',
             optionflags=doctest.IGNORE_EXCEPTION_DETAIL,
             globs=dict(
                 get_connection=get_connection,
                 get_db=get_db
             )),
         doctest.DocFileSuite(
-            'cleanup.txt',
+            'cleanup.rst',
             optionflags=doctest.IGNORE_EXCEPTION_DETAIL,
             globs=dict(
                 get_connection=get_connection,

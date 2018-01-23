@@ -53,14 +53,10 @@ class DemoKeyReference(object):
         return (self.key_type_id, self._id)
 
     def __eq__(self, other):
-        if self.key_type_id == other.key_type_id:
-            return self._id == other._id
-        return self.key_type_id == other.key_type_id
+        return (self.key_type_id, self._id) == (other.key_type_id, other._id)
 
     def __lt__(self, other):
-        if self.key_type_id == other.key_type_id:
-            return self._id < other._id
-        return self.key_type_id < other.key_type_id
+        return (self.key_type_id, self._id) < (other.key_type_id, other._id)
 
 
 layer = zope.app.appsetup.testlayer.ZODBLayer(zope.locking)

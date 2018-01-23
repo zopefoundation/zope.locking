@@ -6,9 +6,14 @@ Changes
 3.0.0 (unreleased)
 ------------------
 
+- Note: The browser views and related code where removed. You need to provide
+  those in application-level code now.
+
 - Package the zcml files.
 
-- Revived from svn.zope.org, removed browser parts, updated dependencies.
+- Updated dependencies.
+
+- Revived from svn.zope.org
 
 ------------------
 1.2.2 (2011-01-31)

@@ -18,9 +18,9 @@ from zope import interface, component
 from zope.locking import interfaces, tokens
 
 
+@component.adapter(interface.Interface)
 @interface.implementer(interfaces.ITokenBroker)
 class TokenBroker(object):
-    component.adapts(interface.Interface)
 
     def __init__(self, context):
         self.context = self.__parent__ = context
@@ -136,9 +136,9 @@ class TokenHandler(object):
         raise NotImplementedError
 
 
+@component.adapter(interfaces.IExclusiveLock)
 @interface.implementer(interfaces.IExclusiveLockHandler)
 class ExclusiveLockHandler(TokenHandler):
-    component.adapts(interfaces.IExclusiveLock)
 
     def release(self, principal_ids=None):
         pids, interaction_pids, token_pids = self._getPrincipalIds(
@@ -148,9 +148,9 @@ class ExclusiveLockHandler(TokenHandler):
             self.token.end()
 
 
+@component.adapter(interfaces.ISharedLock)
 @interface.implementer(interfaces.ISharedLockHandler)
 class SharedLockHandler(TokenHandler):
-    component.adapts(interfaces.ISharedLock)
 
     def release(self, principal_ids=None):
         pids, interaction_pids, token_pids = self._getPrincipalIds(

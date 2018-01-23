@@ -30,10 +30,9 @@ class Demo(object):
 
 
 @functools.total_ordering
+@zope.component.adapter(IDemo)
 @zope.interface.implementer(zope.keyreference.interfaces.IKeyReference)
 class DemoKeyReference(object):
-    zope.component.adapts(IDemo)
-
     _class_counter = 0
 
     key_type_id = 'zope.locking.testing.DemoKeyReference'

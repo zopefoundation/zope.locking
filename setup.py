@@ -96,5 +96,5 @@ setup(
         ],
     author='Zope Project',
     author_email='zope3-dev@zope.org',
-    url='http://github.com/zopefoundation/zope.locking',
+    url='https://github.com/zopefoundation/zope.locking',
     )

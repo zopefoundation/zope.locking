@@ -92,7 +92,7 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Topic :: Internet :: WWW/HTTP',
-        'Framework :: Zope3',
+        'Framework :: Zope :: 3',
         ],
     author='Zope Project',
     author_email='zope3-dev@zope.org',

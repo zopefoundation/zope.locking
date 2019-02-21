@@ -17,7 +17,7 @@ Locking interfaces
 $Id: $
 """
 from zope import interface, schema
-from zope.component.interfaces import IObjectEvent, ObjectEvent
+from zope.interface.interfaces import IObjectEvent, ObjectEvent
 
 
 ##############################################################################

@@ -6,7 +6,7 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix DeprecationWarnings for ObjectEvent.
 
 
 2.0.0 (2018-01-23)

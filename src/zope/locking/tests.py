@@ -13,8 +13,16 @@
 ##############################################################################
 
 import doctest
+import re
 import unittest
 import zope.locking.testing
+import zope.testing.renormalizing
+
+
+normalizer = zope.testing.renormalizing.RENormalizing([
+    (re.compile(r'datetime\.timedelta\(0, (.*)\)'),
+     r'datetime.timedelta(seconds=\1)'),
+])
 
 
 def test_suite():
@@ -31,6 +39,7 @@ def test_suite():
         doctest.DocFileSuite(
             'README.rst',
             optionflags=doctest.IGNORE_EXCEPTION_DETAIL,
+            checker=normalizer,
             globs=dict(
                 get_connection=get_connection,
                 get_db=get_db
@@ -38,6 +47,7 @@ def test_suite():
         doctest.DocFileSuite(
             'annoying.rst',
             optionflags=doctest.IGNORE_EXCEPTION_DETAIL,
+            checker=normalizer,
             globs=dict(
                 get_connection=get_connection,
                 get_db=get_db
@@ -45,10 +55,11 @@ def test_suite():
         doctest.DocFileSuite(
             'cleanup.rst',
             optionflags=doctest.IGNORE_EXCEPTION_DETAIL,
+            checker=normalizer,
             globs=dict(
                 get_connection=get_connection,
                 get_db=get_db
             )),
-        ))
+    ))
     suite.layer = layer
     return suite

@@ -255,7 +255,7 @@ simply starts providing the `expiration` value for the `ended` attribute.
     >>> four = datetime.timedelta(hours=4)
     >>> lock = util.register(tokens.ExclusiveLock(demo, 'john', three))
     >>> lock.duration
-    datetime.timedelta(0, 10800)
+    datetime.timedelta(seconds=10800)
     >>> three >= lock.remaining_duration >= two
     True
     >>> lock.ended is None
@@ -298,7 +298,7 @@ Next we'll change the duration attribute.
 
     >>> lock.duration = four
     >>> lock.duration
-    datetime.timedelta(0, 14400)
+    datetime.timedelta(seconds=14400)
     >>> four >= lock.remaining_duration >= three
     True
     >>> ev = events[-1]
@@ -320,7 +320,7 @@ check and modify the remaining_duration attribute.
     >>> oldNow = zope.locking.utils.now
     >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
     >>> lock.duration
-    datetime.timedelta(0, 14400)
+    datetime.timedelta(seconds=14400)
     >>> two >= lock.remaining_duration >= one
     True
     >>> lock.remaining_duration -= one
@@ -649,8 +649,8 @@ demonstration we are simplifying the registration.
 
     >>> component.provideUtility(util, provides=interfaces.ITokenUtility)
 
-    >>> import zope.component.interfaces
-    >>> @interface.implementer(zope.component.interfaces.IComponentLookup)
+    >>> import zope.interface.interfaces
+    >>> @interface.implementer(zope.interface.interfaces.IComponentLookup)
     ... @component.adapter(interface.Interface)
     ... def siteManager(obj):
     ...     return component.getGlobalSiteManager()

@@ -2,11 +2,14 @@
 Changes
 =======
 
-------------------
-2.0.1 (unreleased)
+2.1.0 (unreleased)
 ------------------
 
 - Fix DeprecationWarnings for ObjectEvent.
+
+- Add support for Python 3.7 and 3.8.
+
+- Drop support for Python 3.3 and 3.4.
 
 
 2.0.0 (2018-01-23)
@@ -23,7 +26,7 @@ Changes
 
 - Revived from svn.zope.org
 
-------------------
+
 1.2.2 (2011-01-31)
 ------------------
 
@@ -31,7 +34,7 @@ Changes
 
 - Split generations config into its own zcml file.
 
-------------------
+
 1.2.1 (2010-01-20)
 ------------------
 
@@ -39,7 +42,7 @@ Changes
   expired tokens, and could leave the token utility in an inconsistent
   state.
 
-----------------
+
 1.2 (2009-11-23)
 ----------------
 
@@ -60,7 +63,7 @@ Changes
 
 - Fix some missing imports.
 
----
+
 1.1
 ---
 
@@ -71,7 +74,7 @@ Changes
 
 - converted to use eggs
 
----
+
 1.0
 ---
 

@@ -34,7 +34,7 @@ Timed expirations work the same as with exclusive locks.
     >>> lock = util.register(
     ...     tokens.SharedLock(demo, ('john', 'mary'), duration=three))
     >>> lock.duration
-    datetime.timedelta(0, 10800)
+    datetime.timedelta(seconds=10800)
     >>> three >= lock.remaining_duration >= two
     True
     >>> lock.expiration == lock.started + lock.duration
@@ -76,7 +76,7 @@ Next we'll change the duration attribute.
 
     >>> lock.duration = four
     >>> lock.duration
-    datetime.timedelta(0, 14400)
+    datetime.timedelta(seconds=14400)
     >>> four >= lock.remaining_duration >= three
     True
     >>> ev = events[-1]
@@ -98,7 +98,7 @@ check and modify the remaining_duration attribute.
     >>> oldNow = zope.locking.utils.now
     >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
     >>> lock.duration
-    datetime.timedelta(0, 14400)
+    datetime.timedelta(seconds=14400)
     >>> two >= lock.remaining_duration >= one
     True
     >>> lock.remaining_duration -= datetime.timedelta(hours=1)
@@ -241,7 +241,7 @@ simply starts answering `True` for the `ended` attribute.
     >>> four = datetime.timedelta(hours=4)
     >>> token = util.register(tokens.EndableFreeze(demo, three))
     >>> token.duration
-    datetime.timedelta(0, 10800)
+    datetime.timedelta(seconds=10800)
     >>> three >= token.remaining_duration >= two
     True
     >>> token.ended is None
@@ -281,7 +281,7 @@ Next we'll change the duration attribute.
 
     >>> token.duration = four
     >>> token.duration
-    datetime.timedelta(0, 14400)
+    datetime.timedelta(seconds=14400)
     >>> four >= token.remaining_duration >= three
     True
     >>> ev = events[-1]
@@ -303,7 +303,7 @@ check and modify the remaining_duration attribute.
     >>> oldNow = zope.locking.utils.now
     >>> zope.locking.utils.now = hackNow # make code think it's 2 hours later
     >>> token.duration
-    datetime.timedelta(0, 14400)
+    datetime.timedelta(seconds=14400)
     >>> two >= token.remaining_duration >= one
     True
     >>> token.remaining_duration -= one

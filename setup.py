@@ -28,7 +28,7 @@ def read(*rnames):
         return f.read()
 
 
-version = '2.0.1.dev0'
+version = '2.1.0.dev0'
 
 
 tests_require = [
@@ -36,7 +36,7 @@ tests_require = [
     'zope.app.appsetup',
     'zope.testing',
     'zope.testrunner',
-    ]
+]
 
 
 setup(
@@ -47,6 +47,14 @@ setup(
     package_dir={'': 'src'},
     namespace_packages=['zope'],
     include_package_data=True,
+    python_requires=', '.join([
+        '>=2.7',
+        '!=3.0.*',
+        '!=3.1.*',
+        '!=3.2.*',
+        '!=3.3.*',
+        '!=3.4.*',
+    ]),
     install_requires=[
         'BTrees',
         'persistent',
@@ -55,12 +63,12 @@ setup(
         'zope.component',
         'zope.event',
         'zope.generations',
-        'zope.interface',
+        'zope.interface >= 3.8',
         'zope.keyreference',
         'zope.location',
         'zope.schema',
         'zope.security',
-        ],
+    ],
     zip_safe=False,
     tests_require=tests_require,
     extras_require={'test': tests_require},
@@ -73,7 +81,7 @@ setup(
         read('src', 'zope', 'locking', 'README.rst')
         + '\n\n' +
         read('CHANGES.rst')
-        ),
+    ),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -83,18 +91,18 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Topic :: Internet :: WWW/HTTP',
         'Framework :: Zope :: 3',
-        ],
+    ],
     author='Zope Project',
     author_email='zope3-dev@zope.org',
     url='https://github.com/zopefoundation/zope.locking',
-    )
+)

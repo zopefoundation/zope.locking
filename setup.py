@@ -47,6 +47,14 @@ setup(
     package_dir={'': 'src'},
     namespace_packages=['zope'],
     include_package_data=True,
+    python_requires=', '.join([
+        '>=2.7',
+        '!=3.0.*',
+        '!=3.1.*',
+        '!=3.2.*',
+        '!=3.3.*',
+        '!=3.4.*',
+    ]),
     install_requires=[
         'BTrees',
         'persistent',

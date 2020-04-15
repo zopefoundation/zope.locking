@@ -1,2 +1,5 @@
-recursive-include src *.*
-include *.rst *.cfg
+include *.rst
+include buildout.cfg
+include tox.ini
+recursive-include src *.rst
+recursive-include src *.zcml

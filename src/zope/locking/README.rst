@@ -67,9 +67,8 @@ zope.locking.interfaces.IAbstractToken, but we'll look at the four tokens that
 come with the zope.locking package: an exclusive lock, a shared lock, a
 permanent freeze, and an endable freeze.
 
----------------
 Exclusive Locks
----------------
+===============
 
 Exclusive locks are tokens that are owned by a single principal.  No principal
 may be added or removed: the lock token must be ended and another started for
@@ -384,9 +383,9 @@ in a state that is not fully initialized.
     ...
     zope.locking.interfaces.UnregisteredError: ...
 
-------------
+
 Shared Locks
-------------
+============
 
 Shared locks are very similar to exclusive locks, but take an iterable of one
 or more principals at creation, and can have principals added or removed while
@@ -540,9 +539,9 @@ Timed expirations work the same as with exclusive locks.  We won't repeat that
 here, though look in the annoying.txt document in this package for the actual
 repeated tests.
 
---------------
+
 EndableFreezes
---------------
+==============
 
 An endable freeze token is similar to a lock token except that it grants the
 'lock' to no one.
@@ -564,9 +563,9 @@ for the comprehensive copy-and-paste tests duplicating the exclusive lock
 tests.  Notice that an EndableFreeze will never be a part of an iterable of
 tokens by principal: by definition, a freeze is associated with no principals.
 
--------
+
 Freezes
--------
+=======
 
 Freezes are similar to EndableFreezes, except they are not endable.  They are
 intended to be used by system level operations that should permanently disable
@@ -627,9 +626,9 @@ to be addressed by the ITokenBroker interface, and associated adapter; the last
 need is intended to be addressed by the ITokenHandler, and associated
 adapters.
 
-------------
+
 TokenBrokers
-------------
+============
 
 Token brokers adapt an object, which is the object whose tokens are
 brokered, and uses this object as a security context.  They provide a few
@@ -863,9 +862,9 @@ often the right place.
 Again, the TokenBroker does embody some policy; if it is not good policy for
 your application, build your own interfaces and adapters that do.
 
--------------
+
 TokenHandlers
--------------
+=============
 
 TokenHandlers are useful for endable tokens with one or more principals--that
 is, locks, but not freezes. They are intended to be protected with a lower
@@ -1018,9 +1017,9 @@ principals in the current interaction must be a part of the lock.
     >>> lock.end()
     >>> zope.security.management.endInteraction()
 
---------
+
 Warnings
---------
+========
 
 * The token utility will register a token for an object if it can.  It does not
   check to see if it is actually the local token utility for the given object.
@@ -1030,9 +1029,9 @@ Warnings
 * Tokens are stored as keys in BTrees, and therefore must be orderable
   (i.e., they must implement __cmp__).
 
--------------------------------
+
 Intended Security Configuration
--------------------------------
+===============================
 
 Utilities are typically unprotected in Zope 3--or more accurately, have
 no security assertions and are used with no security proxy--and the token
@@ -1062,9 +1061,9 @@ another principal--but are a reasonable start.
     >>> handler.__parent__ is lock
     True
 
----------------
+
 Random Thoughts
----------------
+===============
 
 As a side effect of the design, it is conceivable that multiple lock utilities
 could be in use at once, governing different aspects of an object; however,

@@ -77,7 +77,7 @@ setup(
         '(locked to no-one).'),
     long_description=(
         read('README.rst')
-        + '\n\n' +
+        + '\n\n.. contents::\n\n' +
         read('src', 'zope', 'locking', 'README.rst')
         + '\n\n' +
         read('CHANGES.rst')

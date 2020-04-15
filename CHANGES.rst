@@ -2,7 +2,7 @@
 Changes
 =======
 
-2.1.0 (unreleased)
+2.1.0 (2020-04-15)
 ==================
 
 - Fix DeprecationWarnings for ObjectEvent.

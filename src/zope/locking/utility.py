@@ -134,12 +134,13 @@ class TokenUtility(persistent.Persistent, Location):
 
     def iterForPrincipalId(self, principal_id):
         locks = self._principal_ids.get(principal_id, ())
-        for l in locks:
-            assert principal_id in frozenset(l.principal_ids)
-            if not l.ended:
-                yield l
+        for lock in locks:
+            assert principal_id in frozenset(lock.principal_ids)
+            if not lock.ended:
+                yield lock
 
     def __iter__(self):
-        for l in self._locks.values():
-            if not interfaces.IEndable.providedBy(l[0]) or not l[0].ended:
-                yield l[0]
+        for lock in self._locks.values():
+            if (not interfaces.IEndable.providedBy(lock[0])
+                    or not lock[0].ended):
+                yield lock[0]

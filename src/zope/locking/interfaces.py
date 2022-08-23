@@ -340,7 +340,8 @@ class ITokenHandler(IAbstractToken, IEndable):
         required=False)
 
     def release(principal_ids=None):  # may only remove ids in interaction.
-        """remove the given principal_ids from the token, or all in interaction.
+        """Remove given principal_ids from the token, or all in interaction.
+
         All explicitly given principal_ids must be in interaction.  Silently
         ignores requests to remove principals who are not currently part of
         token.

@@ -15,8 +15,10 @@
 import doctest
 import re
 import unittest
-import zope.locking.testing
+
 import zope.testing.renormalizing
+
+import zope.locking.testing
 
 
 normalizer = zope.testing.renormalizing.RENormalizing([

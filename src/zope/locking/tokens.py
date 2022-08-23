@@ -14,11 +14,14 @@
 
 import datetime
 import functools
-import persistent
 
+import persistent
 from BTrees.OOBTree import OOBTree
-from zope import interface, event
-from zope.locking import interfaces, utils
+
+from zope import event
+from zope import interface
+from zope.locking import interfaces
+from zope.locking import utils
 
 
 NO_DURATION = datetime.timedelta()

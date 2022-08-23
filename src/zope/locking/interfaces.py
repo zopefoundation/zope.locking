@@ -11,13 +11,12 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""
-Locking interfaces
+"""Locking interfaces"""
+from zope.interface.interfaces import IObjectEvent
+from zope.interface.interfaces import ObjectEvent
 
-$Id: $
-"""
-from zope import interface, schema
-from zope.interface.interfaces import IObjectEvent, ObjectEvent
+from zope import interface
+from zope import schema
 
 
 ##############################################################################

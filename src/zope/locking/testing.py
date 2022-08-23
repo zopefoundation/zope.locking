@@ -13,10 +13,12 @@
 ##############################################################################
 
 import functools
+
 import zope.app.appsetup.testlayer
 import zope.component
 import zope.interface
 import zope.keyreference.interfaces
+
 import zope.locking
 
 

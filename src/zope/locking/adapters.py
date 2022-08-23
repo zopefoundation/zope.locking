@@ -14,8 +14,10 @@
 
 import zope.security.management
 
-from zope import interface, component
-from zope.locking import interfaces, tokens
+from zope import component
+from zope import interface
+from zope.locking import interfaces
+from zope.locking import tokens
 
 
 @component.adapter(interface.Interface)

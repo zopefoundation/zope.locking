@@ -14,12 +14,15 @@
 
 import persistent
 import persistent.interfaces
-
-from BTrees.OOBTree import OOBTree, OOTreeSet
-from zope import interface, event
+from BTrees.OOBTree import OOBTree
+from BTrees.OOBTree import OOTreeSet
 from zope.keyreference.interfaces import IKeyReference
 from zope.location import Location
-from zope.locking import interfaces, utils
+
+from zope import event
+from zope import interface
+from zope.locking import interfaces
+from zope.locking import utils
 
 
 @interface.implementer(interfaces.ITokenUtility)

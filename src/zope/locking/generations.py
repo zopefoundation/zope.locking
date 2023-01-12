@@ -22,7 +22,7 @@ import zope.locking.utils
 
 @zope.interface.implementer(
     zope.generations.interfaces.IInstallableSchemaManager)
-class SchemaManager(object):
+class SchemaManager:
     minimum_generation = 2
     generation = 2
 
@@ -46,8 +46,7 @@ def get_site_managers(app_root):
     def _get_site_managers(sm):
         yield sm
         for sm in sm.subs:
-            for _sm in _get_site_managers(sm):
-                yield _sm
+            yield from _get_site_managers(sm)
     return _get_site_managers(app_root.getSiteManager())
 
 

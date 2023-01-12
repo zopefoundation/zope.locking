@@ -22,7 +22,7 @@ from zope.locking import tokens
 
 @component.adapter(interface.Interface)
 @interface.implementer(interfaces.ITokenBroker)
-class TokenBroker(object):
+class TokenBroker:
 
     def __init__(self, context):
         self.context = self.__parent__ = context
@@ -76,10 +76,10 @@ class TokenBroker(object):
 def getInteractionPrincipals():
     interaction = zope.security.management.queryInteraction()
     if interaction is not None:
-        return set(p.principal.id for p in interaction.participations)
+        return {p.principal.id for p in interaction.participations}
 
 
-class TokenHandler(object):
+class TokenHandler:
     def __init__(self, token):
         self.__parent__ = self.token = token
 

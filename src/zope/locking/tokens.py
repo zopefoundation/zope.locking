@@ -84,7 +84,7 @@ class Token(persistent.Persistent):
 class EndableToken(Token):
 
     def __init__(self, target, duration=None):
-        super(EndableToken, self).__init__(target)
+        super().__init__(target)
         self._duration = duration
 
     @property
@@ -212,7 +212,7 @@ class ExclusiveLock(EndableToken):
 
     def __init__(self, target, principal_id, duration=None):
         self._principal_ids = frozenset((principal_id,))
-        super(ExclusiveLock, self).__init__(target, duration)
+        super().__init__(target, duration)
 
 
 @interface.implementer(interfaces.ISharedLock)
@@ -220,7 +220,7 @@ class SharedLock(EndableToken):
 
     def __init__(self, target, principal_ids, duration=None):
         self._principal_ids = frozenset(principal_ids)
-        super(SharedLock, self).__init__(target, duration)
+        super().__init__(target, duration)
 
     def add(self, principal_ids):
         if self.ended:

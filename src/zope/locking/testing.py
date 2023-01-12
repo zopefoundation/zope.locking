@@ -27,14 +27,14 @@ class IDemo(zope.interface.Interface):
 
 
 @zope.interface.implementer(IDemo)
-class Demo(object):
+class Demo:
     pass
 
 
 @functools.total_ordering
 @zope.component.adapter(IDemo)
 @zope.interface.implementer(zope.keyreference.interfaces.IKeyReference)
-class DemoKeyReference(object):
+class DemoKeyReference:
     _class_counter = 0
 
     key_type_id = 'zope.locking.testing.DemoKeyReference'

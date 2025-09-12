@@ -20,7 +20,6 @@
 """
 import os.path
 
-from setuptools import find_packages
 from setuptools import setup
 
 
@@ -29,14 +28,14 @@ def read(*rnames):
         return f.read()
 
 
-version = '3.1.dev0'
+version = '4.0.dev0'
 
 
 tests_require = [
     'transaction',
     'zope.app.appsetup',
     'zope.testing',
-    'zope.testrunner',
+    'zope.testrunner >= 6.4',
 ]
 
 
@@ -44,9 +43,6 @@ setup(
     name="zope.locking",
     version=version,
     license='ZPL-2.1',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    namespace_packages=['zope'],
     include_package_data=True,
     python_requires='>=3.9',
     install_requires=[

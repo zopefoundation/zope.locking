@@ -2,10 +2,10 @@
 Changes
 =======
 
-3.1 (unreleased)
+4.0 (unreleased)
 ================
 
-- Nothing changed yet.
+- Replace ``pkg_resources`` namespace with PEP 420 native namespace.
 
 
 3.0 (2025-09-04)

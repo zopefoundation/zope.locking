@@ -16,82 +16,8 @@
 # When developing and releasing this package, please follow the documented
 # Zope Toolkit policies as described by this documentation.
 ##############################################################################
-"""Setup for zope.locking package
-"""
-import os.path
-
 from setuptools import setup
 
 
-def read(*rnames):
-    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
-        return f.read()
-
-
-version = '4.1.dev0'
-
-
-tests_require = [
-    'transaction',
-    'zope.app.appsetup',
-    'zope.testing',
-    'zope.testrunner >= 6.4',
-]
-
-
-setup(
-    name="zope.locking",
-    version=version,
-    license='ZPL-2.1',
-    include_package_data=True,
-    python_requires='>=3.11',
-    install_requires=[
-        'BTrees',
-        'persistent',
-        'pytz',
-        'setuptools',
-        'zope.component',
-        'zope.event',
-        'zope.generations',
-        'zope.interface >= 3.8',
-        'zope.keyreference',
-        'zope.location',
-        'zope.schema',
-        'zope.security',
-    ],
-    zip_safe=False,
-    tests_require=tests_require,
-    extras_require={'test': tests_require},
-    description=(
-        'Advisory exclusive locks, shared locks, and freezes '
-        '(locked to no-one).'),
-    long_description=(
-        read('README.rst')
-        + '\n\n.. contents::\n\n' +
-        read('src', 'zope', 'locking', 'README.rst')
-        + '\n\n' +
-        read('CHANGES.rst')
-    ),
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Zope Public License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12',
-        'Programming Language :: Python :: 3.13',
-        'Programming Language :: Python :: 3.14',
-        'Programming Language :: Python :: 3.15',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Topic :: Internet :: WWW/HTTP',
-        'Framework :: Zope :: 3',
-    ],
-    author='Zope Project',
-    author_email='zope3-dev@zope.org',
-    url='https://github.com/zopefoundation/zope.locking',
-)
+# See pyproject.toml for package metadata
+setup()

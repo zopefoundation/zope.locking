@@ -7,6 +7,65 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+
+[project]
+name = "zope.locking"
+version = "4.1.dev0"
+description = "Advisory exclusive locks, shared locks, and freezes (locked to no-one)."
+license = "ZPL-2.1"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP",
+    "Framework :: Zope :: 3",
+]
+dynamic = ["readme"]
+requires-python = ">=3.11"
+authors = [
+    {name = "Zope Project",email = "zope3-dev@zope.dev"},
+]
+maintainers = [
+    {name = "Plone Foundation and contributors",email = "zope-dev@zope.dev"},
+]
+dependencies = [
+    "BTrees",
+    "persistent",
+    "pytz",
+    "zope.component",
+    "zope.event",
+    "zope.generations",
+    "zope.interface >= 3.8",
+    "zope.keyreference",
+    "zope.location",
+    "zope.schema",
+    "zope.security",
+]
+
+[project.optional-dependencies]
+test = [
+    "transaction",
+    "zope.app.appsetup",
+    "zope.testing",
+    "zope.testrunner >= 6.4",
+]
+
+[project.urls]
+Source = "https://github.com/zopefoundation/zope.locking"
+Issues = "https://github.com/zopefoundation/zope.locking/issues"
+Changelog = "https://raw.githubusercontent.com/zopefoundation/zope.locking/master/CHANGES.rst"
+
 [tool.coverage.run]
 branch = true
 source = ["zope.locking"]
@@ -29,3 +88,6 @@ exclude_lines = [
 
 [tool.coverage.html]
 directory = "parts/htmlcov"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst", "CHANGES.rst"]}
